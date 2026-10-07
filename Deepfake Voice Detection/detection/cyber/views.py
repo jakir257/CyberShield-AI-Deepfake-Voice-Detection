@@ -470,10 +470,7 @@ def upload_segment(request):
     # 16 kHz mono PCM16 with a 44-byte header, so the duration is arithmetic
     seconds = round(max(0, size - 44) / float(16000 * 2), 2)
 
-    # Added
     # Analyze this live segment using the existing deepfake model      
-    # analysis = model_training.predict(path)
-    #Added temp
 
     print("======================================")
     print("LIVE SEGMENT:", path)
@@ -482,7 +479,7 @@ def upload_segment(request):
     print("FORENSICS WHY NOT:", forensics_model.why_not())
     print("LIVE MODEL RESULT:", analysis)
     print("======================================")
-    #End Temp
+
     # Analyze this live segment using the Forensics 0.3B model
 
     print("======================================")
@@ -518,19 +515,7 @@ def upload_segment(request):
             "verdict": verdict,
             "fake_probability": fake_probability
         }, f)
-    #End
-    # return JsonResponse({
-    #     "status": "success",
-    #     "session": session,
-    #     "index": index,
-    #     "filename": name,
-    #     "bytes": size,
-    #     "seconds": seconds,
-    #     "url": settings.MEDIA_URL + "live_segments/" + session + "/" + name,
-    #     "received_at": time.time(),
-    #     "verdict": verdict,
-    #     "fake_probability": fake_probability
-    # })
+    
     return JsonResponse({
         "status": "success",
         "session": session,
@@ -1195,7 +1180,6 @@ def run_pipeline(audio_file, source):
                 "is_model_prediction": False,
             }
 
-        # Added
         # =====================================================
         # LOG-MEL SPECTROGRAM
         # =====================================================
@@ -1207,7 +1191,6 @@ def run_pipeline(audio_file, source):
         except Exception as spectrogram_error:
             logger.exception("Could not generate log-mel spectrogram")
             payload["spectrogram"] = None
-        # Ended
 
         # Remember the run so the dashboard can show uploads that came from
         # somewhere else (the phone). Without this the browser only ever sees
@@ -1219,17 +1202,12 @@ def run_pipeline(audio_file, source):
         with open(last_result_path(), "w", encoding="utf-8") as f:
             json.dump(payload, f)
 
-        # record_report(payload, source)
-
-        # return JsonResponse(payload)
-        # Added
         report = record_report(payload, source)
 
         if report:
             payload["report_id"] = report.id
 
         return JsonResponse(payload)
-        # Ended
 
 
     except Exception as e:
@@ -1969,7 +1947,6 @@ def forensic_pdf(request, report_id):
              "cannot clear a finding that came from resolving a domain or "
              "measuring audio.", size=7.8, grey=0.45)
 
-    # Added
     # ---- log-mel spectrogram --------------------------------------------
     if r.kind == ForensicReport.VOICE and r.media_url:
         name = os.path.basename(r.media_url.rstrip("/"))
@@ -2013,7 +1990,6 @@ def forensic_pdf(request, report_id):
 
             except Exception:
                 logger.exception("spectrogram for PDF failed")
-    # Ended
 
     # ---- how far to trust this ------------------------------------------
     if y > 44 * mm:

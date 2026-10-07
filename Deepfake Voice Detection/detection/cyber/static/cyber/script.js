@@ -12,16 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectAudioBtn = document.getElementById('select-audio-btn');
     const audioInput = document.getElementById('audio-file-input');
 
-    // Added
     const anotherSelectAudioBtn =
     document.getElementById("another-select-audio-btn");
 
     const anotherAudioInput =
         document.getElementById("another-audio-file-input");
 
-    // const anotherUploadForm =
-    //     document.getElementById("another-audio-upload-form");
-    // Ended
 
     /* =========================================================
     THEME
@@ -199,13 +195,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorBox = document.getElementById("audio-error");
     const tryAgainBtn = document.getElementById("try-again-btn");
 
-    // Added
     const anotherUploadForm = document.getElementById("another-audio-upload-form");
 
     const anotherFileInput = document.getElementById("another-audio-file-input");
 
     const anotherSelectBtn = document.getElementById("another-select-audio-btn");
-    // Ended
 
 
     /* =========================================================
@@ -222,7 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }
 
-    // Added
     /* =========================================================
     UPLOAD ANOTHER FILE
     ========================================================= */
@@ -263,7 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     }
-    // Ended
 
 
     /* =========================================================
@@ -284,7 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }
 
-    // Added
     /* =========================================================
     UPLOAD ANOTHER FILE
     ========================================================= */
@@ -328,7 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     }
-    // Ended
 
 
     /* =========================================================
@@ -542,7 +532,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    // Added
     function loadVoiceExplanation(reportId) {
 
         const section =
@@ -635,7 +624,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             });
     }
-    // Ended
 
     function checkTrustedVoice(filename) {
 
@@ -735,7 +723,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showAcousticAnalysis(data.analysis);
         showVoiceStatus(data);
 
-        // Added
         if (data.report_id) {
             loadVoiceExplanation(data.report_id);
         }
@@ -771,7 +758,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 spectrogramSection.style.display = "none";
             }
         }
-        // Ended
 
         // the analysis just logged a forensic report and may have raised an
         // alert; keep the history, the tiles and the bell current
@@ -983,10 +969,6 @@ document.addEventListener('DOMContentLoaded', () => {
     UPLOAD AUDIO
     ========================================================= */
 
-    // async function uploadAudio() {
-
-    //     const formData = new FormData(uploadForm);
-    // Added
     let uploadInProgress = false;
 
     async function uploadAudio(form = uploadForm) {
@@ -1008,11 +990,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         uploadInProgress = true;
-        /* Hide previous result while the new file is processing */
+        /* Hide previous result while new file is processing */
         resultBox.style.display = "none";
         errorBox.style.display = "none";
         uploadState.style.display = "block";
-    // Ended
         
         /* Hide error if previous attempt failed */
         // errorBox.style.display = "none";
@@ -1035,10 +1016,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
 
             const response = await fetch(
-                // uploadForm.action,
-                // Added
                 form.action,
-                // Ended
                 {
                     method: "POST",
                     body: formData
@@ -1053,14 +1031,12 @@ document.addEventListener('DOMContentLoaded', () => {
             ================================================= */
 
             if (data.status === "success") {
-                // Added
                 const spectrogram = document.getElementById("voice-spectrogram");
 
                 if (spectrogram && data.spectrogram) {
                     spectrogram.src = "data:image/png;base64," + data.spectrogram;
                     spectrogram.style.display = "block";
                 }
-                // Ended
                 showAudioResult(data);
             }
 
@@ -1103,13 +1079,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         }
 
-        // Added
         finally {
 
             uploadInProgress = false;
 
         }  
-        // Ended
 
     }
 
@@ -1342,11 +1316,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const fresh = (Date.now() / 1000 - last.received_at) < 120;
                 liveDot.classList.toggle("stale", !fresh);
 
-                // if (last.received_at > lastSeenAt) {
-                //     lastSeenAt = last.received_at;
-                // }
-
-                // Added
                 if (last.received_at > lastSeenAt) {
                     lastSeenAt = last.received_at;
 
@@ -1389,7 +1358,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                     }
                 }
-                // Ended
 
             }
 
@@ -2306,42 +2274,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 // newest first: during a live call the latest segment is the
                 // one worth hearing, and it should not require scrolling
                 segList.innerHTML = segments.slice().reverse().map(function (s, i) {
-                    // return '<li class="seg-row' + (i === 0 ? " fresh" : "") + '">' +             
-                    //        '<span class="seg-index">#' +
-                    //        (segments.length - i) + "</span>" +
-                    //        '<audio controls preload="none" src="' + esc(s.url) +
-                    //        '"></audio>' +
-                    //        '<span class="seg-meta">' + s.seconds + "s &middot; " +
-                    //        Math.round(s.bytes / 1024) + " KB</span></li>";
-                    // Added
-                    // return '<li class="seg-row' + (i === 0 ? " fresh" : "") + '">' +
-                    //        '<span class="seg-index">#' +
-                    //        (segments.length - i) + "</span>" +
-                    //        '<audio controls preload="none" src="' + esc(s.url) +
-                    //        '"></audio>' +
-                    //        '<span class="seg-meta">' + s.seconds + "s &middot; " +
-                    //        Math.round(s.bytes / 1024) + " KB</span>" +
-                    //        '<span class="seg-result">' +
-                    //        (s.verdict
-                    //            ? s.verdict.toUpperCase() +
-                    //                (typeof s.fake_probability === "number"
-                    //                    ? " (" + (s.fake_probability * 100).toFixed(1) + "% fake)"
-                    //                    : "")
-                    //            : "ANALYZING...") +
-                    //        '</span></li>';
                     return '<li class="seg-row' + (i === 0 ? " fresh" : "") + '">' +
                         '<span class="seg-index">#' +
                         (segments.length - i) + "</span>" +
-                        // '<audio controls preload="none" src="' + esc(s.url) +
-                        // '"></audio>' +
-                        // '<span class="seg-meta">' + s.seconds + "s &middot; " +
-                        // Math.round(s.bytes / 1024) + " KB</span></li>";
                         '<audio controls preload="none" style="width:330px;flex:0 0 330px;" src="' + esc(s.url) +
                         '"></audio>' +
                         '<span class="seg-meta" style="margin-left:auto;text-align:right;">' +
                         s.seconds + "s &middot; " +
                         Math.round(s.bytes / 1024) + " KB</span></li>";
-                    //End
                 }).join("");
             })
             .catch(function () { /* the rest of the dashboard is unaffected */ });
