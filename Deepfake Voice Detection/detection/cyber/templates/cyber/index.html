@@ -1,0 +1,1236 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberShield AI | Advanced Detection Dashboard</title>
+    <!-- External CSS Dependencies -->
+    <link rel="stylesheet" href="{% static 'cyber/style.css'%}?v=28">
+
+    <!-- Runs before the stylesheet paints. Setting the theme from JS after
+         load means a flash of the wrong colours on every page view. -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem("cybershield-theme");
+                if (saved === "light" || saved === "dark") {
+                    document.documentElement.setAttribute("data-theme", saved);
+                }
+            } catch (e) { /* private mode: fall through to the OS preference */ }
+        })();
+    </script>
+
+    <script src="{% static 'cyber/script.js'%}?v=28"></script>
+</head>
+<body class="text-slate-200 antialiased min-h-screen">
+
+    <!-- Main Application Wrapper. Reaching this page at all means a valid
+         session: the view is @login_required, so an anonymous visitor is
+         redirected to /signin/ before any of this is rendered. -->
+    <div id="dashboard-app">
+        <!-- Sidebar Navigation -->
+        <aside class="fixed left-0 top-0 h-screen w-64 glass-card z-50 flex flex-col">
+            <div class="p-6">
+                <h1 class="text-2xl font-extrabold tracking-tighter text-red-500">CYBERSHIELD <span class="text-slate-100">AI</span></h1>
+                <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">Cybercrime Detection Platform</p>
+            </div>
+
+            <nav class="flex-1 px-4 space-y-2 mt-4">
+                <div data-tab="dashboard" id="nav-dashboard" class="nav-link active-tab flex items-center p-3 rounded-lg">
+                    <i data-lucide="layout-dashboard" class="mr-3 w-5"></i> Dashboard
+                </div>
+                <div data-tab="voice" id="nav-voice" class="nav-link flex items-center p-3 rounded-lg text-slate-400">
+                    <i data-lucide="mic" class="mr-3 w-5"></i> Voice Detection
+                </div>
+                <div data-tab="message" id="nav-message" class="nav-link flex items-center p-3 rounded-lg text-slate-400">
+                    <i data-lucide="mail" class="mr-3 w-5"></i> Scam Message
+                </div>
+                <div data-tab="url" id="nav-url" class="nav-link flex items-center p-3 rounded-lg text-slate-400">
+                    <i data-lucide="link" class="mr-3 w-5"></i> URL Analysis
+                </div>
+                <div data-tab="forensic" id="nav-forensic" class="nav-link flex items-center p-3 rounded-lg text-slate-400">
+                    <i data-lucide="file-search" class="mr-3 w-5"></i> Forensic Reports
+                </div>
+                <div data-tab="training" id="nav-training" class="nav-link flex items-center p-3 rounded-lg text-slate-400">
+                    <i data-lucide="brain-circuit" class="mr-3 w-5"></i> Train Model
+                </div>
+                <div data-tab="settings" id="nav-settings" class="nav-link flex items-center p-3 rounded-lg text-slate-400">
+                    <i data-lucide="settings" class="mr-3 w-5"></i> LLM
+                </div>
+            </nav>
+
+            <!-- How to point the phone at this PC. The address is detected,
+                 not typed, because this machine has several and only one is
+                 reachable from a phone. -->
+            <div id="connect-help" class="connect-help">
+                <div class="connect-head">CONNECT YOUR PHONE</div>
+                <ol class="connect-steps">
+                    <li>Phone and PC on the <b>same wifi</b></li>
+                    <li>Open <b>CallStream</b>, put this in <b>Detection server</b>:</li>
+                </ol>
+                <div class="connect-url">
+                    <code id="connect-address">detecting...</code>
+                    <button type="button" id="copy-address" title="Copy">copy</button>
+                </div>
+                <ol class="connect-steps" start="3">
+                    <li>Tap <b>TEST CONNECTION</b> in the app</li>
+                </ol>
+            </div>
+
+            <!-- Is the phone talking to this PC right now? It only counts as
+                 connected if it checked in within the last ~25s. -->
+            <div id="phone-status" class="phone-status offline" title="">
+                <span class="phone-dot"></span>
+                <div class="phone-text">
+                    <span id="phone-state">Phone offline</span>
+                    <span id="phone-detail">no device has connected</span>
+                </div>
+            </div>
+
+            <div class="p-6 border-t border-slate-800 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div id="user-avatar" class="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center font-bold text-xs">{{ user_initials }}</div>
+                    <div>
+                        <p id="user-display-name" class="text-sm font-bold truncate w-24">{{ user_display_name }}</p>
+                        <p class="text-[10px] text-slate-500">Security Analyst</p>
+                    </div>
+                </div>
+                <a id="logout-btn" class="logout-btn" href="{% url 'signout' %}" title="Sign out">
+                    <span class="logout-icon">⇥</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="ml-64 min-h-screen">
+
+            <!-- Top bar. Sits above the tab panels rather than inside one,
+                 so the theme control is reachable from every screen. -->
+            <div class="topbar">
+                <div class="topbar-crumb">
+                    <span class="topbar-product">CyberShield</span>
+                    <span class="topbar-sep">/</span>
+                    <span id="topbar-tab">Dashboard</span>
+                </div>
+
+                <div class="topbar-actions">
+                    <!-- Real-time alerts. Polled with the rest of the dashboard;
+                         the badge only counts what has not been seen. -->
+                    <button type="button" id="alert-bell" class="alert-bell"
+                            title="Alerts">
+                        <span class="alert-bell-icon">&#128276;</span>
+                        <span id="alert-count" class="alert-badge" hidden>0</span>
+                    </button>
+
+                    <div id="alert-panel" class="alert-panel" hidden>
+                        <div class="alert-panel-head">
+                            <span>Alerts</span>
+                            <button id="alert-seen" class="tr-btn" type="button">Mark all read</button>
+                        </div>
+                        <div id="alert-list" class="alert-list"></div>
+                    </div>
+
+                    <button type="button" id="theme-toggle" class="theme-toggle"
+                            aria-label="Switch between light and dark theme">
+                        <span class="theme-track">
+                            <span class="theme-thumb"></span>
+                        </span>
+                        <span id="theme-label" class="theme-label">Dark</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-inner">
+            
+            <!-- Tab 1: Dashboard Overview -->
+            <section id="tab-dashboard" class="tab-content">
+                <header class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-bold">Security Overview</h2>
+                        <p class="text-slate-400">Real-time threat monitoring dashboard</p>
+                    </div>
+                    <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center">
+                        <i data-lucide="shield-alert" class="mr-2 w-4"></i> System Secure
+                    </button>
+                </header>
+
+                <!-- Counted from the forensic log, not hardcoded. Every tile
+                     is a count of rows this system actually wrote. -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="glass-card p-6 rounded-2xl">
+                        <p class="text-slate-500 text-sm">Total Scans</p>
+                        <h3 id="stat-total" class="text-3xl font-bold mt-1">--</h3>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl">
+                        <p class="text-slate-500 text-sm">AI Voices Detected</p>
+                        <h3 id="stat-voices" class="stat-number stat-red">--</h3>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl">
+                        <p class="text-slate-500 text-sm">Scam Messages Detected</p>
+                        <h3 id="stat-messages" class="stat-number stat-red">--</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="glass-card p-6 rounded-2xl">
+                        <p class="text-slate-500 text-sm">Malicious Links Detected</p>
+                        <h3 id="stat-links" class="stat-number stat-red">--</h3>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl">
+                        <p class="text-slate-500 text-sm">High-Risk Alerts</p>
+                        <h3 id="stat-highrisk" class="stat-number stat-red">--</h3>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl">
+                        <!-- <p class="text-slate-500 text-sm">Detector Accuracy</p>
+                        <h3 id="stat-accuracy" class="stat-number stat-green">--</h3> -->
+                        <!-- named honestly: this is the detector's own figure
+                             from its EER, not a measured system accuracy -->
+                        <!-- <p id="stat-accuracy-note" class="text-slate-500 text-[11px] mt-1"></p> -->
+                        <p class="text-slate-500 text-sm">Model Accuracy</p>
+                        <h3 id="stat-accuracy" class="stat-number stat-green">--</h3>
+                        <p id="stat-accuracy-note" class="text-slate-500 text-[11px] mt-1">
+                            From validation metrics
+                        </p>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-8 text-center border-dashed border-2 border-slate-700">
+                    <i data-lucide="zap" class="mx-auto w-12 h-12 text-yellow-500 mb-4"></i>
+                    <h4 class="text-xl font-bold">Quick Analysis</h4>
+                    <p class="text-slate-400 mb-6">Start by selecting a module from the sidebar to detect DeepFakes or Scams.</p>
+                    <div class="flex justify-center space-x-4">
+                        <button data-tab="voice" class="quick-nav-btn bg-slate-700 px-6 py-2 rounded-full hover:bg-slate-600">Scan Voice</button>
+                        <button data-tab="url" class="quick-nav-btn bg-slate-700 px-6 py-2 rounded-full hover:bg-slate-600">Check Link</button>
+                    </div>
+                </div>              
+            </section>
+
+            <!-- Tab 2: Voice Detection -->
+            <section id="tab-voice" class="tab-content hidden">
+                <div class="voice-page-header">
+                    <h2>DeepFake Voice Detection</h2>
+                    <p>Module 3: Audio Feature Extraction & Detection</p>
+                </div>
+                
+                <div class="voice-layout">
+                    
+                    <!-- =========================================================
+                        VOICE UPLOAD / STANDARDIZATION CARD
+                    ========================================================= -->
+
+                    <div class="voice-upload-card" id="voice-upload-card">
+
+                        <!-- Upload State -->
+                        <div id="voice-upload-state">
+
+                            <i
+                                data-lucide="upload-cloud"
+                                class="voice-upload-icon"
+                            ></i>
+
+                            <h3>Upload Audio File</h3>
+
+                            <p class="voice-upload-text">
+                                Select WAV, MP3, M4A or FLAC files here
+                                <br>
+                                <span>(Max 10MB)</span>
+                            </p>
+
+                            <form
+                                id="audio-upload-form"
+                                method="POST"
+                                action="{% url 'upload_audio' %}"
+                                enctype="multipart/form-data"
+                            >
+
+                                {% csrf_token %}
+
+                                <input
+                                    type="file"
+                                    id="audio-file-input"
+                                    name="audio"
+                                    accept=".wav,.mp3,.m4a,.flac"
+                                    required
+                                    hidden
+                                >
+
+                                <button
+                                    type="button"
+                                    id="select-audio-btn"
+                                >
+                                    Select File
+                                </button>
+
+                            </form>
+
+                            <p
+                                id="selected-file-name"
+                                class="selected-file-name"
+                                style="display: none;"
+                            >
+                                Selected File:
+                                <strong id="selected-file-text"></strong>
+                            </p>
+
+                        </div>
+
+
+                        <!-- =====================================================
+                            SUCCESS / STANDARDIZED AUDIO STATE
+                        ====================================================== -->
+
+                        <div
+                            id="audio-result"
+                            class="audio-result"
+                            style="display: none;"
+                        >
+
+                            <div class="audio-success-icon">
+                                ✓
+                            </div>
+
+                            <h3>Audio Standardized Successfully</h3>
+
+                            <p class="audio-result-text">
+                                Your audio has been converted and prepared
+                                for deepfake voice analysis.
+                            </p>
+
+                            <!-- File Names -->
+
+                            <div class="audio-file-names">
+
+                                <p>
+                                    <span>Original File</span>
+                                    <strong id="original-filename"></strong>
+                                </p>
+
+                                <p>
+                                    <span>Standardized WAV</span>
+                                    <strong id="processed-filename"></strong>
+                                </p>
+
+                            </div>
+
+                            <!-- Audio Information -->
+
+                            <div class="audio-specs">
+
+                                <div class="audio-spec">
+                                    <span>Sample Rate</span>
+                                    <strong>
+                                        <span id="sample-rate"></span> Hz
+                                    </strong>
+                                </div>
+
+                                <div class="audio-spec">
+                                    <span>Channels</span>
+                                    <strong id="channels"></strong>
+                                </div>
+
+                                <div class="audio-spec">
+                                    <span>Duration</span>
+                                    <strong>
+                                        <span id="duration"></span> sec
+                                    </strong>
+                                </div>
+
+                            </div>
+
+                            <!-- Converted Audio -->
+
+                            <div class="converted-audio-section">
+
+                                <h4>Standardized WAV Audio</h4>
+
+                                <audio
+                                    id="processed-audio"
+                                    controls
+                                >
+                                    Your browser does not support audio playback.
+                                </audio>
+
+                            </div>
+                            
+                            <!-- =====================================================
+                                NOISE REDUCTION
+                            ====================================================== -->
+
+                            <div class="processing-info-section">
+
+                                <h4>
+                                    Noise Reduction
+                                </h4>
+
+                                <p class="processing-description">
+                                    Background noise has been reduced using
+                                    conservative filtering.
+                                </p>
+
+                                <div class="processing-info-row">
+
+                                    <span>
+                                        Reduction Strength
+                                    </span>
+
+                                    <strong>
+                                        <span id="noise-reduction-strength"></span>
+                                    </strong>
+
+                                </div>
+
+                                <audio
+                                    id="noise-reduced-audio"
+                                    controls
+                                >
+                                    Your browser does not support audio playback.
+                                </audio>
+
+                            </div>
+
+
+                            <!-- =====================================================
+                                SILENCE TRIMMING
+                            ====================================================== -->
+
+                            <div class="processing-info-section">
+
+                                <h4>
+                                    Silence Trimming
+                                </h4>
+
+                                <div class="processing-info-row">
+
+                                    <span>
+                                        Original Duration
+                                    </span>
+
+                                    <strong>
+                                        <span id="original-duration"></span>
+                                        sec
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="processing-info-row">
+
+                                    <span>
+                                        After Trimming
+                                    </span>
+
+                                    <strong>
+                                        <span id="trimmed-duration"></span>
+                                        sec
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                            <!-- =====================================================
+                                TRIMMED AUDIO
+                            ====================================================== -->
+
+                            <div class="processing-info-section">
+
+                                <h4>
+                                    Audio After Silence Trimming
+                                </h4>
+
+                                <p class="processing-description">
+                                    Long silence at the beginning and end
+                                    has been removed.
+                                </p>
+
+                                <audio
+                                    id="trimmed-audio"
+                                    controls
+                                >
+                                    Your browser does not support audio playback.
+                                </audio>
+
+                            </div>
+
+                            <!-- =====================================================
+                                AUDIO SEGMENTATION
+                            ====================================================== -->
+
+                            <div class="processing-info-section">
+
+                                <h4>
+                                    Audio Segmentation
+                                </h4>
+
+
+                                <div class="processing-info-row">
+
+                                    <span>
+                                        Segment Duration
+                                    </span>
+
+                                    <strong>
+                                        <span id="segment-duration"></span>
+                                        sec
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="processing-info-row">
+
+                                    <span>
+                                        Segments Created
+                                    </span>
+
+                                    <strong>
+                                        <span id="segment-count"></span>
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                            <!-- =====================================================
+                                AUDIO SEGMENTS — PLAYBACK
+                            ====================================================== -->
+
+                            <div class="processing-info-section">
+
+                                <h4>
+                                    Audio Segments
+                                </h4>
+
+                                <p class="processing-description">
+                                    The trimmed audio has been divided into
+                                    standardized 4-second segments.
+                                </p>
+
+                                <div id="audio-segments-container">
+
+                                    <!-- JavaScript will add segments here -->
+
+                                </div>
+
+                            </div>
+
+                            <!-- Added -->
+                            <div
+                                id="another-upload-section"
+                                class="another-upload-section"
+                            >
+                                <br><br><br><br><br><br><br>
+                                <h4>Upload Another File</h4>
+
+                                <p class="voice-upload-text">
+                                    Select WAV, MP3, M4A or FLAC files here
+                                    <br>
+                                    <span>(Max 10MB)</span>
+                                </p>
+
+                                <form
+                                    id="another-audio-upload-form"
+                                    method="POST"
+                                    action="{% url 'upload_audio' %}"
+                                    enctype="multipart/form-data"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <input
+                                        type="file"
+                                        id="another-audio-file-input"
+                                        name="audio"
+                                        accept=".wav,.mp3,.m4a,.flac"
+                                        hidden
+                                    >
+
+                                    <button
+                                        type="button"
+                                        id="another-select-audio-btn"
+                                    >
+                                        Select File
+                                    </button>
+
+                                </form>
+
+                                <p
+                                    id="another-selected-file-name"
+                                    class="selected-file-name"
+                                    style="display:none;"
+                                >
+                                    Selected File:
+                                    <strong id="another-selected-file-text"></strong>
+                                </p>
+
+                            </div>
+                            <!-- Ended -->
+
+                        </div>
+
+
+                        <!-- =====================================================
+                            ERROR STATE
+                        ====================================================== -->
+
+                        <div
+                            id="audio-error"
+                            class="audio-error"
+                            style="display: none;"
+                        >
+
+                            <div class="audio-error-icon">
+                                !
+                            </div>
+
+                            <h3>Audio Processing Failed</h3>
+
+                            <p id="error-message"></p>
+
+                            <button
+                                type="button"
+                                id="try-again-btn"
+                            >
+                                Try Again
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Analysis Result Area -->
+                    <div class="voice-result-card">
+
+                        <h3 class="voice-result-title">
+
+                            <i data-lucide="activity"></i>
+
+                            Analysis Results
+
+                        </h3>
+
+
+                        <div id="voice-result-box">
+
+                            <!-- Which model scores uploads. Changing it here
+                                 changes it everywhere; "Test" scores a clip with
+                                 the selected model without switching. -->
+                            <div id="vd-picker" class="vd-picker" style="display:none;">
+                                <label class="vd-picker-label" for="vd-model">Detection model</label>
+                                <select id="vd-model" class="vd-picker-select"></select>
+                                <button id="vd-use" class="vd-picker-btn">Use this</button>
+                                <span id="vd-picker-note" class="vd-picker-note"></span>
+                            </div>
+
+                            <!-- Trained-model verdict. Hidden until a model
+                                 exists; the heuristics below are the fallback. -->
+                            <div id="af-model" class="af-model" style="display:none;">
+                                <div class="af-model-head">
+                                    <span class="af-model-label">Model verdict</span>
+                                    <span id="af-model-eer" class="af-model-eer"></span>
+                                </div>
+                                <div class="af-model-body">
+                                    <span id="af-model-verdict" class="af-model-verdict">--</span>
+                                    <span id="af-model-prob" class="af-model-prob"></span>
+                                </div>
+                                <div class="voice-progress">
+                                    <div id="af-model-bar" class="voice-progress-fill"
+                                         style="width: 0%;"></div>
+                                </div>
+                                <p id="af-model-note" class="af-model-note"></p>
+                            </div>
+                            
+                            <!-- Added -->
+
+                            <!-- =====================================================
+                                EXPLAINABLE AI
+                            ====================================================== -->
+
+                            <div
+                                id="voice-xai-section"
+                                class="voice-xai-section"
+                                style="display: none;"
+                            >
+
+                                <h4>Explanation</h4>
+
+                                <p
+                                    id="voice-xai-text"
+                                    class="voice-xai-text"
+                                >
+                                    Computing explanation...
+                                </p>
+
+                            </div>
+
+                            <!-- =====================================================
+                                LOG-MEL SPECTROGRAM
+                            ====================================================== -->
+
+                            <div class="voice-spectrogram-card">
+                                <h3>Log-mel spectrogram</h3>
+
+                                <img
+                                    id="voice-spectrogram"
+                                    src=""
+                                    alt="Log-mel spectrogram"
+                                    style="display: none;"
+                                >
+                            </div>
+                            <!-- Ended -->
+
+                            <!-- TRUSTED VOICE VERIFICATION -->
+                            <!-- <div id="trusted-voice-result" class="trusted-voice-result" style="display:none;">
+                      
+                                <h3>Trusted Voice Verification</h3>
+
+                                <div class="trusted-voice-row">
+                                    <span>Enrolled person</span>
+                                    <strong id="trusted-voice-name">--</strong>
+                                </div>
+
+                                <div class="trusted-voice-row">
+                                    <span>Similarity</span>
+                                    <strong id="trusted-voice-similarity">--</strong>
+                                </div>
+
+                                <div class="trusted-voice-row">
+                                    <span>Result</span>
+                                    <strong id="trusted-voice-verdict">--</strong>
+                                </div>
+
+                                <p id="trusted-voice-note" class="trusted-voice-note"></p>
+
+                                <p class="trusted-voice-caveat">
+                                    Speaker verification is based on MFCC voice characteristics.
+                                    It is supporting evidence and does not identify a person with certainty.
+                                </p>
+                            </div> -->
+
+                            <!-- Real acoustic indicator, computed per upload.
+                                 Replaces the fixed number that used to live here. -->
+                            <div class="voice-probability">
+                                <span>Synthetic-Artifact Indicator:</span>
+                                <strong id="af-score">--</strong>
+                            </div>
+
+                            <div class="voice-progress">
+                                <div id="af-bar"
+                                     class="voice-progress-fill"
+                                     style="width: 0%;">
+                                </div>
+                            </div>
+
+                            <p id="af-disclaimer" class="af-disclaimer">
+                                Heuristic signal analysis, not a trained
+                                classifier. A high score means the recording has
+                                properties often seen in synthesised or heavily
+                                re-encoded audio &mdash; it is not proof of a deepfake.
+                            </p>
+
+                            <!-- Why it scored that way -->
+                            <div class="voice-xai-box">
+                                <p class="voice-xai-title">
+                                    Why this score
+                                </p>
+                                <ul id="af-notes" class="af-notes">
+                                    <li>Upload or select a file to analyse.</li>
+                                </ul>
+                            </div>
+
+                            <!-- Measured values -->
+                            <div class="af-grid" id="af-grid"></div>
+
+                        <!-- Status Cards -->
+                            <!-- Filled from the payload. These used to be fixed
+                                 text that said "Applied" / "No Match" whatever
+                                 the file was, which is worse than showing nothing. -->
+                            <div class="voice-status-grid">
+
+                                <div class="voice-status-card">
+                                    <p>Noise Reduction</p>
+                                    <strong id="vs-noise" class="status-green">--</strong>
+                                </div>
+
+                                <div class="voice-status-card">
+                                    <p>Classifier</p>
+                                    <strong id="vs-classifier" class="status-green">--</strong>
+                                </div>
+
+                                <div class="voice-status-card">
+                                    <p>Analysed</p>
+                                    <strong id="vs-duration" class="status-green">--</strong>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Live monitoring. Below the verdict on purpose: this
+                             is what is arriving from the phone and other clients,
+                             not the result for the file just analysed. -->
+                        <h3 class="voice-result-title voice-subhead">
+                            <i data-lucide="radio"></i>
+                            Live Monitoring
+                        </h3>
+
+                        <!-- Live feed: uploads arriving from any client (phone included) -->
+                        <div id="live-feed-card">
+
+                            <div class="live-feed-head">
+                                <span class="live-feed-title">LIVE ACTIVITY</span>
+                                <span id="live-dot" class="live-dot"></span>
+                            </div>
+
+                            <div class="live-stats">
+                                <div class="live-stat">
+                                    <span class="ls-label">Uploads</span>
+                                    <span class="ls-value" id="ls-uploads">-</span>
+                                </div>
+                                <div class="live-stat">
+                                    <span class="ls-label">Segments</span>
+                                    <span class="ls-value" id="ls-segments">-</span>
+                                </div>
+                                <div class="live-stat">
+                                    <span class="ls-label">Last Duration</span>
+                                    <span class="ls-value" id="ls-duration">-</span>
+                                </div>
+                                <div class="live-stat">
+                                    <span class="ls-label">Source</span>
+                                    <span class="ls-value" id="ls-source">-</span>
+                                </div>
+                            </div>
+
+                            <div id="live-latest" class="live-latest">
+                                waiting for uploads...
+                            </div>
+
+                            <ul id="live-files" class="live-files"></ul>
+                        </div>
+
+                        <!-- Live 4-second segments pushed by the phone while a
+                             recording is still running. Nothing here is
+                             analysed yet - the point is to see the flow work. -->
+                        <div class="glass-card live-feed" id="live-seg-card">
+                            <div class="live-feed-head">
+                                <span class="live-feed-title">LIVE SEGMENTS</span>
+                                <span id="seg-session" class="msg-device">no recording yet</span>
+                            </div>
+
+                            <p class="set-help">
+                                Press RECORD in the CallStream app with the call
+                                on speaker. A 4-second segment arrives here while
+                                the call is still going.
+                            </p>
+
+                            <div id="seg-stats" class="live-stats">
+                                <div class="live-stat">
+                                    <span class="ls-label">Segments</span>
+                                    <span id="seg-count" class="ls-value">0</span>
+                                </div>
+                                <div class="live-stat">
+                                    <span class="ls-label">Audio</span>
+                                    <span id="seg-seconds" class="ls-value">0s</span>
+                                </div>
+                                <div class="live-stat">
+                                    <span class="ls-label">Last arrived</span>
+                                    <span id="seg-age" class="ls-value">-</span>
+                                </div>
+                            </div>
+
+                            <ul id="seg-list" class="seg-list"></ul>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 3: Scam Message -->
+            <section id="tab-message" class="tab-content hidden">
+                <h2 class="text-3xl font-bold mb-2">Scam Message Detection</h2>
+                <p class="text-slate-400 mb-8">Analyze SMS, Emails, and Messaging texts</p>
+                
+                <div class="max-w-3xl">
+                    <div class="glass-card p-6 rounded-2xl mb-6">
+                        <textarea id="msg-input" class="w-full h-48 bg-slate-900 border border-slate-700 rounded-xl p-4 text-slate-300 focus:outline-none focus:border-red-500" placeholder="Paste the suspicious message content here..."></textarea>
+
+                        <div class="ai-options">
+                            <label>
+                                <input type="checkbox" id="msg-ai">
+                                Ask the LLM
+                                <span id="msg-ai-hint" class="ai-hint">off in LLM settings</span>
+                            </label>
+                        </div>
+
+                        <button id="msg-analyze" class="w-full mt-4 bg-red-600 py-3 rounded-xl font-bold hover:bg-red-700 transition">Analyze Content</button>
+                        <div id="msg-verdict" class="msg-verdict" style="display:none;"></div>
+                    </div>
+
+                    <!-- messages pushed by the Android app -->
+                    <div class="glass-card p-6 rounded-2xl">
+                        <div class="msg-head">
+                            <span class="msg-head-title">FROM YOUR PHONE</span>
+                            <button type="button" id="msg-analyze-all" class="msg-ai-btn" style="display:none;">Analyze all</button>
+                            <span id="msg-device" class="msg-device">no device yet</span>
+                        </div>
+                        <div id="msg-list" class="msg-list">
+                            <p class="msg-empty">
+                                Open the CallStream app and press SCAN MESSAGES.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 4: URL Analysis -->
+            <section id="tab-url" class="tab-content hidden">
+                <h2 class="text-3xl font-bold mb-2">Malicious Link Detection</h2>
+                <p class="text-slate-400 mb-8">Reads the address, then visits the site to see what is really there</p>
+
+                <div class="glass-card p-8 rounded-2xl max-w-4xl">
+                    <div class="flex space-x-4">
+                        <input id="url-input" type="text" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-6 py-3 focus:outline-none focus:border-cyan-500" placeholder="https://suspicious-site.com/login" autocomplete="off" spellcheck="false">
+                        <button id="url-scan" class="bg-cyan-600 px-8 py-3 rounded-xl font-bold hover:bg-cyan-700 transition">Scan Link</button>
+                    </div>
+
+                    <div class="ai-options">
+                        <label>
+                            <input type="checkbox" id="url-live" checked>
+                            Visit the site (DNS, TLS, redirects, page contents)
+                        </label>
+                        <label>
+                            <input type="checkbox" id="url-ai">
+                            Ask the LLM
+                            <span id="url-ai-hint" class="ai-hint">off in LLM settings</span>
+                        </label>
+                    </div>
+
+                    <div id="url-result" class="url-result" style="display:none;"></div>
+                </div>
+            </section>
+            
+            <!-- Tab 5: Forensic Dashboard -->
+            <section id="tab-forensic" class="tab-content hidden">
+
+                <div class="forensic-heading">
+                    <h2>Digital Forensic Dashboard</h2>
+                    <p>Every clip this system has analysed, newest first.</p>
+                </div>
+
+                <!-- Filters. Every one narrows the same query server-side, so
+                     the count below always describes what is on screen. -->
+                <div class="forensic-filters">
+                    <label>Type
+                        <select id="f-kind">
+                            <option value="all">All</option>
+                            <option value="voice">Voice clip</option>
+                            <option value="message">Message</option>
+                            <option value="url">Link</option>
+                        </select>
+                    </label>
+                    <label>Risk
+                        <select id="f-risk">
+                            <option value="ALL">All</option>
+                            <option value="CRITICAL">Critical</option>
+                            <option value="HIGH">High</option>
+                            <option value="MEDIUM">Medium</option>
+                            <option value="LOW">Low</option>
+                            <option value="SAFE">Safe</option>
+                        </select>
+                    </label>
+                    <label>Result
+                        <select id="f-result">
+                            <option value="">Any</option>
+                            <option value="flagged">Flagged</option>
+                            <option value="clean">Clean</option>
+                        </select>
+                    </label>
+                    <label>From <input id="f-from" type="date"></label>
+                    <label>To <input id="f-to" type="date"></label>
+                    <label>Search <input id="f-q" type="search" placeholder="filename, sender, link"></label>
+                    <button id="f-reset" class="tr-btn" type="button">Reset</button>
+                </div>
+
+                <div class="forensic-bar">
+                    <span id="forensic-count" class="forensic-count">loading...</span>
+                    <button id="forensic-refresh" class="tr-btn" type="button">Refresh</button>
+                    <button id="forensic-clear" class="tr-btn danger" type="button">Clear history</button>
+                </div>
+
+                <div class="forensic-table-card">
+
+                    <table class="forensic-table">
+
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Evidence</th>
+                                <th>Risk Level</th>
+                                <th>Detection Result</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <!-- filled from /forensic/reports/ - every row is a real
+                             analysis this system ran, not a sample -->
+                        <tbody id="forensic-rows">
+                            <tr><td colspan="5" class="forensic-empty">loading...</td></tr>
+                        </tbody>
+
+                    </table>
+                </div>
+            </section>
+
+            <!-- One report in full. Hidden until View Report is clicked. -->
+            <div id="report-modal" class="report-modal" hidden>
+                <div class="report-card">
+                    <div class="report-head">
+                        <h3 id="report-title">Report</h3>
+                        <button id="report-close" class="report-close" type="button">&times;</button>
+                    </div>
+                    <div id="report-body" class="report-body"></div>
+                    <div class="report-foot">
+                        <a id="report-pdf" class="tr-btn" href="#" download>Download PDF</a>
+                        <a id="report-docx" class="tr-btn" href="#" download>Download DOCX</a>
+                        <button id="report-cancel" class="tr-btn" type="button">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 6: Local LLM (Ollama) -->
+            <section id="tab-training" class="tab-content hidden">
+
+                <h2 class="text-3xl font-bold mb-2">Train Detection Model</h2>
+                <p class="text-slate-400 mb-8">
+                    Fine-tunes the existing Forensics 0.3B (WavLM-large + AASIST) model.
+                    REAL: IndicVoices + ASVspoof 5 bonafide. FAKE: MLAAD + ASVspoof 5 spoof.
+                    The original checkpoint is kept untouched; the best validation checkpoint
+                    becomes the active model automatically.
+                </p>
+
+                <div class="glass-card tr-card">
+
+                    <div class="tr-status">
+                        <span id="tr-dot" class="tr-dot"></span>
+                        <span id="tr-status-text">checking for a trained model...</span>
+                    </div>
+
+                    <!-- EER is the number that matters. Accuracy is not shown on
+                         purpose: the corpus is ~9x spoof, so "always fake" scores 90%. -->
+                    <div id="tr-model" class="tr-model" style="display:none;">
+                        <div class="tr-metric">
+                            <span class="tr-metric-label">Model</span>
+                            <span id="tr-eer" class="tr-metric-value">Forensics 0.3B</span>
+                            <span class="tr-metric-hint">WavLM-large + AASIST</span>
+                        </div>
+                        <div class="tr-metric">
+                            <span class="tr-metric-label">Training</span>
+                            <span id="tr-threshold" class="tr-metric-value">-</span>
+                            <span class="tr-metric-hint">IndicVoices + ASVspoof 5 + MLAAD</span>
+                        </div>
+                        <div class="tr-metric">
+                            <span class="tr-metric-label">Trained</span>
+                            <span id="tr-when" class="tr-metric-value">-</span>
+                            <span class="tr-metric-hint" id="tr-size">-</span>
+                        </div>
+                    </div>
+
+                    <!-- live progress: hidden until a run is actually going -->
+                    <div id="tr-progress" class="tr-progress" style="display:none;">
+
+                        <div class="tr-progress-head">
+                            <span id="tr-phase" class="tr-phase">starting</span>
+                            <span id="tr-percent" class="tr-percent">0%</span>
+                        </div>
+
+                        <div class="tr-bar">
+                            <div id="tr-bar-fill" class="tr-bar-fill"></div>
+                        </div>
+
+                        <div class="tr-progress-stats">
+                            <span><span id="tr-clips" class="tr-stat-value">0</span> clips read</span>
+                            <span><span id="tr-elapsed-live" class="tr-stat-value">0s</span> elapsed</span>
+                            <span><span id="tr-eta" class="tr-stat-value">-</span> remaining</span>
+                            <span><span id="tr-rate" class="tr-stat-value">-</span> clips/s</span>
+                        </div>
+
+                    </div>
+
+                    <!-- Which corpus to train on. Filled from /train/datasets/,
+                         which reports what is actually unpacked on disk. -->
+                    <div class="tr-datasets">
+                        <h4 class="tr-models-title">Dataset</h4>
+                        <div id="tr-dataset-list" class="tr-dataset-list">
+                            <p class="tr-empty">Looking for datasets...</p>
+                        </div>
+                    </div>
+
+                    <div class="tr-controls">
+                        <label class="tr-limit">
+                            Training clips per class
+                            <input id="tr-limit" type="number" min="50" step="50"
+                                value="6000" class="tr-limit-input">
+                        </label>
+                        <label class="tr-limit">
+                            Epochs
+                            <input id="tr-epochs" type="number" min="1" max="20" step="1"
+                                   value="2" class="tr-limit-input">
+                        </label>
+                        <button id="tr-start" class="tr-btn">
+                            <i data-lucide="play" class="w-4 h-4"></i>
+                            Start Training
+                        </button>
+                        <button id="tr-stop" class="tr-btn danger" style="display:none;">
+                            <i data-lucide="square" class="w-4 h-4"></i>
+                            Stop
+                        </button>
+                        <span id="tr-elapsed" class="tr-elapsed"></span>
+                    </div>
+
+                    <p class="tr-hint">
+                        This value is the number of REAL clips and FAKE clips used for training.
+                        For example, 6000 means 6000 REAL + 6000 FAKE = 12000 training clips.
+                        The clips are sampled from the prepared multilingual manifest.
+                        Validation clips remain separate and are used to select the best checkpoint.
+                        Picking a dataset sorts it into real/ and fake/ first if that has
+                        not been done yet, so the first run on a new dataset takes longer to get going.
+                    </p>
+
+                    <!-- Every model that has been trained. Each run saves a new
+                         file rather than overwriting, so a worse run can be
+                         undone by selecting the previous one. -->
+                    <div class="tr-models">
+                        <h4 class="tr-models-title">Models</h4>
+                        <p class="tr-hint" style="margin-top:-4px;">
+                            Models you trained, plus the pretrained Forensics 0.3B
+                            if its weights are in <code>media/forensics/</code>.
+                            Forensics is licensed CC-BY-NC-4.0 &mdash; research and
+                            personal use, not commercial.
+                        </p>
+                        <div id="tr-model-list" class="tr-model-list">
+                            <p class="tr-empty">No models yet.</p>
+                        </div>
+                    </div>
+
+                    <!-- Score one clip with a chosen model without making it
+                         the active one. Hits /models/test/, which is separate
+                         from the Voice Detection pipeline: no standardising,
+                         no denoising, the file is read as given. -->
+                    <div class="tr-try">
+                        <h4 class="tr-models-title">Test a model on one clip</h4>
+
+                        <div class="tr-try-row">
+                            <select id="tr-try-model" class="tr-try-select"></select>
+                            <input id="tr-try-file" type="file"
+                                   accept=".wav,.mp3,.m4a,.flac,.ogg,.opus" hidden>
+                            <button id="tr-try-pick" class="tr-btn" type="button">
+                                Choose audio
+                            </button>
+                            <button id="tr-try-run" class="tr-btn" type="button" disabled>
+                                Test
+                            </button>
+                            <span id="tr-try-name" class="tr-try-name"></span>
+                        </div>
+
+                        <div id="tr-try-result" class="tr-try-result" hidden></div>
+
+                        <p class="tr-hint">
+                            Scores the clip with the model you pick and changes nothing -
+                            the active model stays as it is. The file is read as given,
+                            so this is the model's raw verdict.
+                        </p>
+                    </div>
+
+                    <pre id="tr-log" class="tr-log">No training run yet.</pre>
+
+                </div>
+
+            </section>
+
+            <section id="tab-settings" class="tab-content hidden">
+
+                <h2 class="text-3xl font-bold mb-2">Local LLM</h2>
+                <p class="text-slate-400 mb-8">
+                    Ollama runs on this machine. Messages and links are read by an
+                    LLM on your own hardware - nothing is sent anywhere.
+                </p>
+
+                <div class="glass-card set-card">
+
+                    <div class="set-status">
+                        <span id="set-dot" class="set-dot"></span>
+                        <span id="set-status-text">checking Ollama...</span>
+                    </div>
+
+                    <!-- What the selected model scored on the accuracy suite.
+                         Models differ a lot here, and the difference is not
+                         guessable from the name or the size. -->
+                    <div id="set-rating" class="set-rating" style="display:none;"></div>
+
+                    <div class="set-field">
+                        <label for="set-host">Ollama host</label>
+                        <div class="set-row">
+                            <input id="set-host" type="text" value="http://localhost:11434" spellcheck="false">
+                            <button id="set-refresh" type="button" class="set-btn ghost">Refresh models</button>
+                        </div>
+                        <p class="set-help">Default is http://localhost:11434. Start it with <code>ollama serve</code>.</p>
+                    </div>
+
+                    <div class="set-field">
+                        <label for="set-model">LLM used for analysis</label>
+                        <select id="set-model">
+                            <option value="">-- no models found --</option>
+                        </select>
+                        <p class="set-help">
+                            A 3B-8B instruct model is plenty here. Pull one with
+                            <code>ollama pull llama3.2</code>.
+                        </p>
+                    </div>
+
+                    <div class="set-field">
+                        <label for="set-timeout">Timeout (seconds)</label>
+                        <input id="set-timeout" type="number" min="5" max="300" value="60">
+                        <p class="set-help">A first call has to load the model into memory - keep this generous.</p>
+                    </div>
+
+                    <label class="set-toggle">
+                        <input type="checkbox" id="set-enabled">
+                        <span>Use the LLM when analysing messages and links</span>
+                    </label>
+
+                    <div class="set-actions">
+                        <button id="set-save" type="button" class="set-btn">Save settings</button>
+                        <button id="set-test" type="button" class="set-btn ghost">Test the LLM</button>
+                    </div>
+
+                    <div id="set-note" class="set-note" style="display:none;"></div>
+                    <div id="set-test-out" class="set-test-out" style="display:none;"></div>
+
+                </div>
+            </section>
+
+            </div>
+        </main>
+    </div>
+    
+    <!-- Sign-out confirmation. The sidebar button used to end the session on
+         one click, which is easy to hit by accident next to the nav. -->
+    <div id="signout-modal" class="modal-backdrop" hidden>
+        <div class="modal" role="dialog" aria-modal="true"
+             aria-labelledby="signout-title">
+            <h3 id="signout-title">Sign out?</h3>
+            <p>You will need your password to sign back in. Anything already
+               analysed stays on this machine.</p>
+            <div class="modal-actions">
+                <button type="button" id="signout-cancel" class="modal-btn ghost">
+                    Stay signed in
+                </button>
+                <a href="{% url 'signout' %}" id="signout-confirm" class="modal-btn danger">
+                    Sign out
+                </a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

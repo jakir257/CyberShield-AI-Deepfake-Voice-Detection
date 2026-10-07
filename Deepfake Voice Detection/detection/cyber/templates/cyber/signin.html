@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in | CyberShield AI</title>
+    <link rel="stylesheet" href="{% static 'cyber/style.css' %}?v=17">
+    <script src="{% static 'cyber/auth.js' %}?v=17"></script>
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem("cybershield-theme");
+                if (t === "light" || t === "dark") {
+                    document.documentElement.setAttribute("data-theme", t);
+                }
+            } catch (e) {}
+        })();
+    </script>
+</head>
+<body class="text-slate-200 antialiased min-h-screen">
+
+    <!-- Authentication Container (Sign In / Sign Up) -->
+    <div id="auth-container" class="min-h-screen flex items-center justify-center p-4">
+        <div class="glass-card p-8 rounded-2xl w-full max-w-md border border-slate-700 shadow-2xl relative overflow-hidden">
+            <!-- Decorative Accent Gradient -->
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-red-600/20 rounded-full blur-2xl"></div>
+            
+            <!-- Logo Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-extrabold tracking-tighter text-red-500">CYBERSHIELD <span class="text-slate-100">AI</span></h1>
+                <p class="text-xs text-slate-400 uppercase tracking-widest font-bold mt-1">Cybercrime Detection Platform</p>
+            </div>
+
+            <!-- Sign In Form -->
+            <div id="auth-signin">
+                <h2 class="text-xl font-bold mb-1 text-slate-100">Sign In</h2>
+                <p class="text-slate-400 text-sm mb-6">Enter your credentials to access the terminal.</p>
+                <form id="signin-form" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-xs uppercase font-bold text-slate-400 mb-1">Email or Phone Number</label>
+                        <div class="relative">
+                            <i data-lucide="user" class="w-5 h-5 absolute left-3 top-3 text-slate-500"></i>
+                            <input type="text" name="identifier" id="signin-identifier" autocomplete="username" class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-red-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase font-bold text-slate-400 mb-1">Password</label>
+                        <div class="relative">
+                            <i data-lucide="lock" class="w-5 h-5 absolute left-3 top-3 text-slate-500"></i>
+                            <input type="password" name="password" id="signin-password" autocomplete="current-password" class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-red-500">
+                        </div>
+                    </div>
+                    <p id="signin-error" class="auth-error" style="display:none;"></p>
+                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 transition font-bold py-3 rounded-xl text-white mt-2">Access Dashboard</button>
+                </form>
+                <p class="text-center text-sm text-slate-400 mt-6">
+                    <a href="{% url 'password_reset' %}" class="auth-link">Forgot your password?</a><br>
+                    Don't have an account? 
+                    <button id="goto-signup-btn" class="text-red-400 hover:underline font-semibold ml-1">Sign Up</button>
+                </p>
+            </div>
+
+            <!-- Sign Up Form -->
+            <div id="auth-signup" class="hidden">
+                <h2 class="text-xl font-bold mb-1 text-slate-100">Create Account</h2>
+                <p class="text-slate-400 text-sm mb-6">Register a new analyst account.</p>
+                <form id="signup-form" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-xs uppercase font-bold text-slate-400 mb-1">Username</label>
+                        <div class="relative">
+                            <i data-lucide="id-card" class="w-5 h-5 absolute left-3 top-3 text-slate-500"></i>
+                            <input type="text" name="username" id="signup-fullname" autocomplete="username" class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-red-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase font-bold text-slate-400 mb-1">Email or Phone Number</label>
+                        <div class="relative">
+                            <i data-lucide="mail" class="w-5 h-5 absolute left-3 top-3 text-slate-500"></i>
+                            <input type="email" name="email" id="signup-email" autocomplete="email" class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-red-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase font-bold text-slate-400 mb-1">Password</label>
+                        <div class="relative">
+                            <i data-lucide="lock" class="w-5 h-5 absolute left-3 top-3 text-slate-500"></i>
+                            <input type="password" name="password1" id="signup-password" autocomplete="new-password" class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-red-500">
+                        </div>
+                    </div>
+                    <p id="signup-error" class="auth-error" style="display:none;"></p>
+                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 transition font-bold py-3 rounded-xl text-white mt-2">Register Account</button>
+                </form>
+                <p class="text-center text-sm text-slate-400 mt-6">
+                    Already have an account? 
+                    <button id="goto-signin-btn" class="text-red-400 hover:underline font-semibold ml-1">Sign In</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,2471 @@
+/* =========================================================
+   CYBERSHIELD AI
+========================================================= */
+
+
+/* =========================================================
+   1. RESET AND GLOBAL SETTINGS
+========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    color: #e2e8f0;
+
+    background:
+        #111827;
+
+    overflow-x: hidden;
+}
+
+button,
+input,
+textarea {
+    font-family: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+.hidden {
+    display: none !important;
+}
+
+
+/* =========================================================
+   2. AUTHENTICATION PAGE
+========================================================= */
+
+#auth-container {
+    min-height: 100vh;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 25px;
+
+    background:
+        radial-gradient(
+            circle at 50% 35%,
+            rgba(239, 68, 68, 0.10),
+            transparent 30%
+        ),
+        #111827;
+}
+
+
+/* Login card */
+
+#auth-container > div {
+    position: relative;
+
+    width: 100%;
+    max-width: 430px;
+
+    padding: 36px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #243247,
+            #192536
+        );
+
+    border:
+        1px solid
+        #3a4a60;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 25px 70px
+        rgba(0, 0, 0, 0.45);
+
+    overflow: hidden;
+}
+
+
+/* Red glow */
+
+#auth-container > div::before {
+    content: "";
+
+    position: absolute;
+
+    width: 180px;
+    height: 180px;
+
+    top: -100px;
+    right: -90px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(239, 68, 68, 0.16);
+
+    filter:
+        blur(40px);
+
+    pointer-events: none;
+}
+
+
+/* Logo */
+
+#auth-container .text-center {
+    position: relative;
+
+    text-align: center;
+
+    margin-bottom: 30px;
+}
+
+#auth-container h1 {
+    color: #ef4444;
+
+    font-size: 28px;
+
+    font-weight: 800;
+
+    letter-spacing: -1px;
+}
+
+#auth-container h1 span {
+    color: #f1f5f9;
+}
+
+#auth-container .text-center p {
+    margin-top: 7px;
+
+    color: #8795a9;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 2px;
+
+    text-transform: uppercase;
+}
+
+
+/* Form title */
+
+#auth-container h2 {
+    position: relative;
+
+    margin-bottom: 7px;
+
+    color: #f1f5f9;
+
+    font-size: 22px;
+}
+
+#auth-container h2 + p {
+    margin-bottom: 24px;
+
+    color: #94a3b8;
+
+    font-size: 14px;
+}
+
+
+/* Form */
+
+#auth-container form {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 17px;
+}
+
+
+/* Labels */
+
+#auth-container label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.6px;
+
+    text-transform: uppercase;
+}
+
+
+/* Input containers */
+
+#auth-container .relative {
+    position: relative;
+}
+
+
+/* Inputs */
+
+#auth-container input {
+    width: 100%;
+
+    height: 46px;
+
+    padding:
+        0 15px
+        0 48px;
+
+    color: #e2e8f0;
+
+    background:
+        #0d1726;
+
+    border:
+        1px solid
+        #35455b;
+
+    border-radius: 10px;
+
+    outline: none;
+
+    font-size: 14px;
+
+    transition:
+        border 0.2s,
+        box-shadow 0.2s;
+}
+
+#auth-container input::placeholder {
+    color: #64748b;
+}
+
+#auth-container input:focus {
+    border-color:
+        #ef4444;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(239, 68, 68, 0.10);
+}
+
+
+/* Hide missing Lucide icon elements */
+
+[data-lucide] {
+    display: none;
+}
+
+
+/* Login button */
+
+#auth-container button[type="submit"] {
+    width: 100%;
+
+    height: 47px;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            90deg,
+            #dc2626,
+            #ef4444
+        );
+
+    border: none;
+
+    border-radius: 10px;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    box-shadow:
+        0 10px 25px
+        rgba(239, 68, 68, 0.22);
+
+    transition:
+        transform 0.2s,
+        background 0.2s;
+}
+
+#auth-container button[type="submit"]:hover {
+    background:
+        #dc2626;
+
+    transform:
+        translateY(-2px);
+}
+
+
+/* Sign-up text */
+
+#auth-container form + p {
+    margin-top: 23px;
+
+    color: #94a3b8;
+
+    font-size: 13px;
+
+    text-align: center;
+}
+
+#auth-container form + p button {
+    color: #f87171;
+
+    background: transparent;
+
+    border: none;
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+#auth-container form + p button:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   3. DASHBOARD LAYOUT
+========================================================= */
+
+#dashboard-app {
+    min-height: 100vh;
+
+    background:
+        #111827;
+}
+
+
+/* Sidebar */
+
+#dashboard-app aside {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 250px;
+    height: 100vh;
+
+    display: flex;
+
+    flex-direction: column;
+
+    background:
+        linear-gradient(
+            180deg,
+            #182437,
+            #111a29
+        );
+
+    border-right:
+        1px solid
+        #304057;
+
+    z-index: 100;
+}
+
+
+/* Sidebar logo */
+
+#dashboard-app aside > div:first-child {
+    padding:
+        27px 25px;
+
+    border-bottom:
+        1px solid
+        #2c3b51;
+}
+
+#dashboard-app aside h1 {
+    color: #ef4444;
+
+    font-size: 23px;
+
+    font-weight: 800;
+
+    letter-spacing: -1px;
+}
+
+#dashboard-app aside h1 span {
+    color: #f1f5f9;
+}
+
+#dashboard-app aside h1 + p {
+    margin-top: 6px;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: 1.6px;
+
+    text-transform: uppercase;
+}
+
+
+/* Navigation */
+
+#dashboard-app nav {
+    flex: 1;
+
+    padding: 20px 15px;
+}
+
+.nav-link {
+    height: 48px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 0 17px;
+
+    margin-bottom: 8px;
+
+    color: #94a3b8;
+
+    border-radius: 9px;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s,
+        color 0.2s;
+}
+
+.nav-link:hover {
+    color: white;
+
+    background:
+        rgba(255, 255, 255, 0.05);
+}
+
+.nav-link.active-tab {
+    color: #f87171;
+
+    background:
+        rgba(239, 68, 68, 0.14);
+
+    border-left:
+        3px solid
+        #ef4444;
+}
+
+
+/* Hide icon placeholders */
+
+.nav-link [data-lucide] {
+    display: none;
+}
+
+
+/* User section */
+
+#dashboard-app aside > div:last-child {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 20px;
+
+    border-top:
+        1px solid
+        #2c3b51;
+}
+
+#dashboard-app aside > div:last-child > div {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+#user-avatar {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+
+    background:
+        #ef4444;
+
+    border-radius: 50%;
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+#user-display-name {
+    color: #e2e8f0;
+
+    font-size: 14px;
+
+    font-weight: 700;
+}
+
+#user-display-name + p {
+    margin-top: 3px;
+
+    color: #64748b;
+
+    font-size: 11px;
+}
+
+#logout-btn {
+    color: #94a3b8;
+
+    background: transparent;
+
+    border: none;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   4. MAIN CONTENT
+========================================================= */
+
+#dashboard-app main {
+    margin-left: 255px;
+
+    min-height: 100vh;
+
+    padding: 32px 34px;
+
+    background: #131c2c;
+}
+
+
+/* Tab */
+
+.tab-content {
+    width: 100%;
+}
+
+
+/* Page headings */
+
+.tab-content h2 {
+    color: #f1f5f9;
+
+    font-size: 31px;
+
+    font-weight: 700;
+
+    margin-bottom: 7px;
+}
+
+.tab-content > p {
+    color: #94a3b8;
+
+    font-size: 15px;
+
+    margin-bottom: 30px;
+}
+
+
+/* =========================================================
+   5. DASHBOARD
+========================================================= */
+
+#tab-dashboard header {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 32px;
+}
+
+#tab-dashboard header h2 {
+    font-size: 31px;
+}
+
+#tab-dashboard header p {
+    margin-top: 6px;
+
+    color: #94a3b8;
+}
+
+
+/* System Secure */
+
+#tab-dashboard header button {
+    display: flex;
+
+    align-items: center;
+
+    padding:
+        13px 20px;
+
+    color: white;
+
+    background:
+        #dc2626;
+
+    border: none;
+
+    border-radius: 9px;
+
+    font-size: 14px;
+
+    font-weight: 700;
+}
+
+
+/* Statistics grid */
+
+#tab-dashboard > .grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 20px;
+
+    margin-bottom: 28px;
+}
+
+#tab-dashboard > .grid > .glass-card {
+    padding: 25px;
+
+    background:
+        #1e293b;
+
+    border:
+        1px solid
+        #334155;
+
+    border-radius: 16px;
+}
+
+#tab-dashboard > .grid p {
+    color: #94a3b8;
+
+    font-size: 14px;
+}
+
+#tab-dashboard > .grid h3 {
+    margin-top: 8px;
+
+    color: white;
+
+    font-size: 30px;
+}
+
+/* Dashboard statistic numbers */
+
+.stat-number {
+    margin-top: 4px;
+
+    font-size: 30px;
+
+    font-weight: 700;
+
+    line-height: 1.2;
+}
+
+
+/* AI Voices Detected */
+
+.stat-red {
+    color: #ff4d4d !important;
+}
+
+
+/* Average Accuracy */
+
+.stat-green {
+    color: #4ade80 !important;
+}
+
+/* Quick analysis */
+
+#tab-dashboard > .glass-card {
+    padding: 45px;
+
+    text-align: center;
+
+    background:
+        #182334;
+
+    border:
+        2px dashed
+        #3b4a60;
+
+    border-radius: 18px;
+}
+
+#tab-dashboard > .glass-card h4 {
+    margin-bottom: 10px;
+
+    color: white;
+
+    font-size: 21px;
+}
+
+#tab-dashboard > .glass-card > p {
+    margin-bottom: 25px;
+
+    color: #94a3b8;
+}
+
+#tab-dashboard > .glass-card > div {
+    display: flex;
+
+    justify-content: center;
+
+    gap: 15px;
+}
+
+.quick-nav-btn {
+    padding:
+        12px 25px;
+
+    color: white;
+
+    background:
+        #334155;
+
+    border: none;
+
+    border-radius: 25px;
+
+    font-size: 14px;
+}
+
+/* Real TIme Alert System */
+
+/* #tab-dashboard .risk-alert {
+    width: 450px;
+    margin: auto;
+    padding: 35px;
+    background: white;
+    border-radius: 15px;
+}
+
+#tab-dashboard .risk-alert h3 {
+    color: #222;
+}
+
+#tab-dashboard .risk-alert input {
+    width: 80%;
+    padding: 14px;
+    font-size: 18px;
+    margin: 15px;
+}
+
+#tab-dashboard .risk-alert button {
+    padding: 14px 28px;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+#tab-dashboard #alertBox {
+    display: none;
+    margin-top: 25px;
+    padding: 20px;
+    border-radius: 10px;
+    background: #ffe5e5;
+    color: #a00000;
+}
+
+#tab-dashboard #safeBox {
+    display: none;
+    margin-top: 25px;
+    padding: 20px;
+    border-radius: 10px;
+    background: #e5ffe9;
+    color: #087a25;
+} */
+
+
+/* =========================================================
+   6. VOICE DETECTION
+========================================================= */
+
+/* Page heading */
+
+#tab-voice {
+    width: 100%;
+    max-width: 1040px;
+
+    margin: 0 auto;
+
+    padding: 0;
+}
+
+
+#tab-voice .voice-page-header {
+    margin-bottom: 26px;
+}
+
+
+#tab-voice .voice-page-header h2 {
+    margin: 0 0 7px;
+
+    color: #e8edf5;
+
+    font-size: 32px;
+
+    font-weight: 700;
+
+    line-height: 1.2;
+}
+
+
+#tab-voice .voice-page-header p {
+    margin: 0;
+
+    color: #9aabc0;
+
+    font-size: 15px;
+}
+
+
+/* Main two-column layout */
+
+#tab-voice .voice-layout {
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 28px;
+
+    width: 100%;
+}
+
+
+/* =========================================================
+   UPLOAD CARD
+========================================================= */
+
+#tab-voice .voice-upload-card {
+    min-height: 390px;
+
+    padding: 35px 30px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    background: #243145;
+
+    border:
+        2px dashed
+        #52657d;
+
+    border-radius: 18px;
+
+    box-sizing: border-box;
+}
+
+
+/* Upload icon */
+
+#tab-voice .voice-upload-icon {
+    width: 55px;
+
+    height: 55px;
+
+    margin-bottom: 18px;
+
+    color: #ff4b4b;
+
+    stroke-width: 1.7;
+}
+
+
+/* Upload heading */
+
+#tab-voice .voice-upload-card h3 {
+    margin: 0 0 8px;
+
+    color: #e7edf5;
+
+    font-size: 18px;
+
+    font-weight: 600;
+}
+
+
+/* Upload description */
+
+#tab-voice .voice-upload-text {
+    margin: 0 0 23px;
+
+    color: #b2c0d2;
+
+    font-size: 15px;
+
+    line-height: 1.45;
+}
+
+
+#tab-voice .voice-upload-text span {
+    color: #8d9db1;
+}
+
+
+/* Select file button */
+
+#tab-voice #select-audio-btn {
+    min-width: 125px;
+
+    padding: 13px 25px;
+
+    color: #ffffff;
+
+    background: #ef3535;
+
+    border: none;
+
+    border-radius: 11px;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+#tab-voice #select-audio-btn:hover {
+    background: #d92929;
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* =========================================================
+   AUDIO STANDARDIZATION RESULT
+========================================================= */
+
+#tab-voice #audio-result {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+
+/* Success icon */
+
+#tab-voice .audio-success-icon {
+    width: 58px;
+    height: 58px;
+
+    margin: 0 auto 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: rgba(46, 204, 113, 0.15);
+
+    border: 2px solid #2ecc71;
+
+    color: #2ecc71;
+
+    font-size: 28px;
+    font-weight: 700;
+}
+
+
+/* Success heading */
+
+#tab-voice #audio-result h3 {
+
+    margin: 0 0 8px;
+
+    color: #e7edf5;
+
+    font-size: 19px;
+
+    font-weight: 600;
+}
+
+
+/* Description */
+
+#tab-voice .audio-result-text {
+
+    margin: 0 auto 25px;
+
+    max-width: 430px;
+
+    color: #9eafc4;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   AUDIO SPECIFICATIONS
+========================================================= */
+
+#tab-voice .audio-specs {
+
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 10px;
+
+    margin-bottom: 25px;
+}
+
+
+#tab-voice .audio-spec {
+
+    padding: 14px 8px;
+
+    background: #182235;
+
+    border: 1px solid #2d3b50;
+
+    border-radius: 10px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+
+#tab-voice .audio-spec span {
+
+    color: #8d9db1;
+
+    font-size: 12px;
+}
+
+
+#tab-voice .audio-spec strong {
+
+    color: #e7edf5;
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   CONVERTED AUDIO
+========================================================= */
+
+#tab-voice .converted-audio-section {
+
+    width: 100%;
+
+    padding-top: 18px;
+
+    border-top:
+        1px solid
+        #344258;
+}
+
+
+#tab-voice .converted-audio-section h4 {
+
+    margin: 0 0 12px;
+
+    color: #c8d4e3;
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+
+/* Audio player */
+
+#tab-voice #processed-audio {
+
+    width: 100%;
+
+    height: 42px;
+}
+
+
+/* =========================================================
+   PROCESSING STATE
+========================================================= */
+
+#tab-voice .audio-loading-icon {
+
+    width: 55px;
+    height: 55px;
+
+    margin: 0 auto 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 3px solid #344258;
+
+    border-top-color: #ef3535;
+
+    border-radius: 50%;
+
+    color: #ef3535;
+
+    font-size: 25px;
+
+    animation:
+        audio-spin
+        1s linear infinite;
+}
+
+
+@keyframes audio-spin {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+/* =========================================================
+   ERROR STATE
+========================================================= */
+
+#tab-voice .audio-error {
+
+    width: 100%;
+
+    text-align: center;
+}
+
+
+#tab-voice .audio-error-icon {
+
+    width: 50px;
+    height: 50px;
+
+    margin: 0 auto 15px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: rgba(239, 53, 53, 0.15);
+
+    border: 2px solid #ef3535;
+
+    color: #ef5353;
+
+    font-size: 24px;
+
+    font-weight: 700;
+}
+
+
+#tab-voice .audio-error h3 {
+
+    margin: 0 0 8px;
+
+    color: #e7edf5;
+
+    font-size: 18px;
+}
+
+
+#tab-voice .audio-error p {
+
+    margin: 0 0 20px;
+
+    color: #ef8b8b;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+/* Try again */
+
+#tab-voice #try-again-btn {
+
+    padding: 11px 22px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #ef3535;
+
+    color: #ffffff;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+#tab-voice #try-again-btn:hover {
+
+    background: #d92929;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    #tab-voice .audio-specs {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
+
+
+/* =========================================================
+   AUDIO FILE NAMES
+========================================================= */
+
+#tab-voice .audio-file-names {
+    width: 100%;
+    margin: 0 auto 22px;
+    padding: 10px 14px;
+
+    background: #182235;
+
+    border: 1px solid #2d3b50;
+    border-radius: 10px;
+
+    box-sizing: border-box;
+}
+
+
+#tab-voice .audio-file-names p {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin: 0;
+    padding: 7px 0;
+
+    text-align: left;
+}
+
+
+#tab-voice .audio-file-names p + p {
+    border-top: 1px solid #2d3b50;
+}
+
+
+#tab-voice .audio-file-names span {
+    color: #8d9db1;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+
+#tab-voice .audio-file-names strong {
+    color: #e7edf5;
+    font-size: 12px;
+    font-weight: 600;
+
+    text-align: right;
+
+    word-break: break-word;
+}
+
+
+/* =========================================================
+   SELECTED FILE BEFORE PROCESSING
+========================================================= */
+
+#tab-voice .selected-file-name {
+    max-width: 100%;
+
+    margin: 18px 0 0;
+
+    color: #8d9db1;
+
+    font-size: 13px;
+
+    word-break: break-word;
+}
+
+
+#tab-voice .selected-file-name strong {
+    color: #e7edf5;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   PROCESSING INFORMATION
+========================================================= */
+
+#tab-voice .processing-info-section {
+
+    width: 100%;
+
+    margin-top: 20px;
+
+    padding-top: 18px;
+
+    border-top:
+        1px solid
+        #344258;
+}
+
+
+#tab-voice .processing-info-section h4 {
+
+    margin: 0 0 12px;
+
+    color: #c8d4e3;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    text-align: left;
+}
+
+
+#tab-voice .processing-info-row {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding: 8px 0;
+}
+
+
+#tab-voice .processing-info-row span {
+
+    color: #8d9db1;
+
+    font-size: 12px;
+}
+
+
+#tab-voice .processing-info-row strong {
+
+    color: #e7edf5;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   PROCESSING DESCRIPTION
+========================================================= */
+
+#tab-voice .processing-description {
+
+    margin: 0 0 15px;
+
+    color: #8d9db1;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+
+    text-align: left;
+}
+
+
+/* =========================================================
+   TRIMMED AUDIO PLAYER
+========================================================= */
+
+#tab-voice #trimmed-audio {
+
+    width: 100%;
+
+    height: 42px;
+
+}
+
+
+/* =========================================================
+   AUDIO SEGMENTS
+========================================================= */
+
+#tab-voice #audio-segments-container {
+
+    width: 100%;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+}
+
+
+/* Individual segment */
+
+#tab-voice .audio-segment-item {
+
+    padding: 12px;
+
+    background: #182235;
+
+    border: 1px solid #2d3b50;
+
+    border-radius: 10px;
+
+    box-sizing: border-box;
+
+}
+
+
+/* Segment header */
+
+#tab-voice .segment-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 8px;
+
+}
+
+
+/* Segment name */
+
+#tab-voice .segment-header span {
+
+    color: #d7e0eb;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+
+/* Duration */
+
+#tab-voice .segment-header strong {
+
+    color: #8d9db1;
+
+    font-size: 11px;
+
+    font-weight: 500;
+
+}
+
+
+/* Segment player */
+
+#tab-voice .audio-segment-item audio {
+
+    width: 100%;
+
+    height: 38px;
+
+}
+
+
+/* =========================================================
+   ANALYSIS RESULT CARD
+========================================================= */
+
+#tab-voice .voice-result-card {
+    min-height: 390px;
+
+    padding: 34px;
+
+    background: #2a374a;
+
+    border:
+        1px solid
+        #40536a;
+
+    border-radius: 18px;
+
+    box-sizing: border-box;
+}
+
+
+/* Result heading */
+
+#tab-voice .voice-result-title {
+    margin: 0 0 27px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    color: #e7edf5;
+
+    font-size: 22px;
+
+    font-weight: 700;
+}
+
+
+#tab-voice .voice-result-title i {
+    width: 22px;
+
+    height: 22px;
+
+    color: #55d7f2;
+
+    stroke-width: 2;
+}
+
+
+/* Result content */
+
+#tab-voice #voice-result-box {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 22px;
+}
+
+
+/* Probability row */
+
+#tab-voice .voice-probability {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    color: #d8e0eb;
+
+    font-size: 16px;
+}
+
+
+#tab-voice .voice-probability strong {
+    color: #f4f6fa;
+
+    font-size: 16px;
+
+    font-family:
+        Consolas,
+        monospace;
+}
+
+
+/* Progress bar */
+
+#tab-voice .voice-progress {
+    width: 100%;
+
+    height: 15px;
+
+    overflow: hidden;
+
+    background: #162132;
+
+    border-radius: 20px;
+}
+
+
+#tab-voice .voice-progress-fill {
+    height: 100%;
+
+    background: #ff4a4a;
+
+    border-radius: 20px;
+}
+
+
+/* =========================================================
+   XAI EXPLANATION
+========================================================= */
+
+#tab-voice .voice-xai-box {
+    padding: 20px;
+
+    background: #172131;
+
+    border:
+        1px solid
+        #405066;
+
+    border-radius: 13px;
+}
+
+
+#tab-voice .voice-xai-title {
+    margin: 0 0 8px;
+
+    color: #aebed1;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.5px;
+}
+
+
+#tab-voice .voice-xai-text {
+    margin: 0;
+
+    color: #d8e0ea;
+
+    font-size: 14px;
+
+    line-height: 1.65;
+
+    font-style: italic;
+}
+
+
+/* =========================================================
+   BOTTOM STATUS CARDS
+========================================================= */
+
+#tab-voice .voice-status-grid {
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 14px;
+}
+
+
+#tab-voice .voice-status-card {
+    min-height: 74px;
+
+    padding: 15px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    background: #172131;
+
+    border-radius: 11px;
+}
+
+
+#tab-voice .voice-status-card p {
+    margin: 0 0 5px;
+
+    color: #8f9fb3;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+}
+
+
+#tab-voice .voice-status-card strong {
+    font-size: 14px;
+}
+
+
+#tab-voice .status-green {
+    color: #52d38a;
+}
+
+
+#tab-voice .status-red {
+    color: #ff5a5a;
+}
+
+
+/* =========================================================
+   RESPONSIVE DESIGN
+========================================================= */
+
+@media screen and (max-width: 900px) {
+
+    #tab-voice {
+        max-width: 100%;
+    }
+
+
+    #tab-voice .voice-layout {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    #tab-voice .voice-upload-card,
+    #tab-voice .voice-result-card {
+        min-height: auto;
+    }
+
+}
+
+
+@media screen and (max-width: 600px) {
+
+    #tab-voice .voice-page-header h2 {
+        font-size: 26px;
+    }
+
+
+    #tab-voice .voice-upload-card,
+    #tab-voice .voice-result-card {
+        padding: 25px 20px;
+    }
+
+
+    #tab-voice .voice-status-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+
+/* =========================================================
+   7. SCAM MESSAGE
+========================================================= */
+
+#tab-message .max-w-3xl {
+    max-width: 900px;
+}
+
+#tab-message .glass-card {
+    padding: 28px;
+
+    border-radius: 18px;
+}
+
+#tab-message textarea {
+    width: 100%;
+
+    height: 220px;
+
+    padding: 18px;
+
+    color: white;
+
+    background:
+        #0f172a;
+
+    border:
+        1px solid
+        #334155;
+
+    border-radius: 12px;
+
+    font-size: 15px;
+
+    outline: none;
+}
+
+#tab-message button {
+    width: 100%;
+
+    margin-top: 18px;
+
+    padding: 15px;
+
+    color: white;
+
+    background:
+        #dc2626;
+
+    border: none;
+
+    border-radius: 10px;
+
+    font-size: 15px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   8. URL ANALYSIS
+========================================================= */
+
+#tab-url .max-w-4xl {
+    max-width: 1050px;
+}
+
+#tab-url .glass-card {
+    padding: 30px;
+
+    border-radius: 18px;
+}
+
+#tab-url .flex {
+    display: flex;
+
+    gap: 15px;
+}
+
+#tab-url input {
+    flex: 1;
+
+    height: 52px;
+
+    padding: 0 20px;
+
+    color: white;
+
+    background:
+        #0f172a;
+
+    border:
+        1px solid
+        #334155;
+
+    border-radius: 12px;
+
+    font-size: 15px;
+}
+
+#tab-url button {
+    padding:
+        0 30px;
+
+    color: white;
+
+    background:
+        #0891b2;
+
+    border: none;
+
+    border-radius: 12px;
+
+    font-size: 15px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   FORENSIC REPORTS PAGE
+========================================================= */
+
+#tab-forensic {
+    width: 100%;
+    max-width: 1100px;
+
+    padding: 0;
+    margin: 0;
+
+    color: #e5e7eb;
+}
+
+
+/* ---------------------------------------------------------
+   PAGE HEADING
+--------------------------------------------------------- */
+
+.forensic-heading {
+    margin-bottom: 32px;
+}
+
+.forensic-heading h2 {
+    margin: 0 0 8px;
+
+    color: #f1f5f9;
+
+    font-size: 32px;
+    font-weight: 700;
+
+    line-height: 1.2;
+}
+
+.forensic-heading p {
+    margin: 0;
+
+    color: #94a3b8;
+
+    font-size: 16px;
+}
+
+
+/* ---------------------------------------------------------
+   TABLE OUTER CARD
+--------------------------------------------------------- */
+
+.forensic-table-card {
+    width: 100%;
+
+    overflow: hidden;
+
+    background: #202c3d;
+
+    border: 1px solid #34445b;
+
+    border-radius: 18px;
+}
+
+
+/* ---------------------------------------------------------
+   TABLE
+--------------------------------------------------------- */
+
+.forensic-table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    table-layout: fixed;
+}
+
+
+/* ---------------------------------------------------------
+   TABLE HEADER
+--------------------------------------------------------- */
+
+.forensic-table thead {
+    background: #263348;
+}
+
+.forensic-table th {
+    padding: 17px 16px;
+
+    color: #9aa9bd;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    text-align: left;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.3px;
+
+    white-space: nowrap;
+}
+
+
+/* ---------------------------------------------------------
+   TABLE BODY
+--------------------------------------------------------- */
+
+.forensic-table td {
+    padding: 18px 16px;
+
+    color: #d2d9e3;
+
+    font-size: 16px;
+
+    vertical-align: middle;
+
+    border-top: 1px solid #2d3a4e;
+}
+
+.forensic-table tbody tr {
+    background: #202c3d;
+
+    transition:
+        background 0.2s ease;
+}
+
+.forensic-table tbody tr:hover {
+    background: #27354a;
+}
+
+
+/* ---------------------------------------------------------
+   COLUMN WIDTHS
+--------------------------------------------------------- */
+
+.forensic-table th:nth-child(1),
+.forensic-table td:nth-child(1) {
+    width: 19%;
+}
+
+.forensic-table th:nth-child(2),
+.forensic-table td:nth-child(2) {
+    width: 22%;
+}
+
+.forensic-table th:nth-child(3),
+.forensic-table td:nth-child(3) {
+    width: 14%;
+}
+
+.forensic-table th:nth-child(4),
+.forensic-table td:nth-child(4) {
+    width: 31%;
+}
+
+.forensic-table th:nth-child(5),
+.forensic-table td:nth-child(5) {
+    width: 14%;
+}
+
+
+/* ---------------------------------------------------------
+   TIMESTAMP
+--------------------------------------------------------- */
+
+.forensic-time {
+    color: #8d9caf !important;
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size: 14px !important;
+
+    white-space: nowrap;
+}
+
+
+/* ---------------------------------------------------------
+   EVIDENCE TYPE
+--------------------------------------------------------- */
+
+.evidence-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    color: #d7dde6;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.evidence-icon {
+    width: 18px;
+    height: 18px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 19px;
+
+    font-weight: 700;
+}
+
+.voice-danger {
+    color: #ff5a5f;
+    transform: rotate(45deg);
+}
+
+.url-icon {
+    color: #4dd4f0;
+    transform: rotate(45deg);
+}
+
+.voice-safe {
+    color: #49d17d;
+    transform: rotate(45deg);
+}
+
+
+/* ---------------------------------------------------------
+   RISK BADGES
+--------------------------------------------------------- */
+
+.risk-badge {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-width: 73px;
+
+    padding: 6px 10px;
+
+    border-radius: 4px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    line-height: 1;
+
+    text-transform: uppercase;
+}
+
+
+/* Critical badge */
+
+.risk-badge.critical {
+    color: #ffd1d1;
+
+    background: #7f2c2d;
+}
+
+
+/* Medium badge */
+
+.risk-badge.medium {
+    color: #ffe1a1;
+
+    background: #71521e;
+}
+
+
+/* Safe badge */
+
+.risk-badge.safe {
+    color: #b8f0c9;
+
+    background: #245c3c;
+}
+
+
+/* ---------------------------------------------------------
+   DETECTION RESULT
+--------------------------------------------------------- */
+
+.detection-result {
+    color: #dce2eb !important;
+
+    font-weight: 500;
+
+    white-space: nowrap;
+}
+
+
+/* ---------------------------------------------------------
+   VIEW REPORT BUTTON
+--------------------------------------------------------- */
+
+.view-report-btn {
+    padding: 0;
+
+    background: transparent;
+
+    border: none;
+
+    color: #5fd3ee;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.view-report-btn:hover {
+    color: #9ae9fa;
+
+    text-decoration: underline;
+
+    transform: translateX(2px);
+}
+
+.view-report-btn:focus {
+    outline: none;
+
+    color: #9ae9fa;
+}
+
+
+/* ---------------------------------------------------------
+   RESPONSIVE TABLE
+--------------------------------------------------------- */
+
+@media screen and (max-width: 900px) {
+
+    .forensic-table-card {
+        overflow-x: auto;
+    }
+
+    .forensic-table {
+        min-width: 900px;
+    }
+
+}
+
+@media screen and (max-width: 600px) {
+
+    .forensic-heading h2 {
+        font-size: 25px;
+    }
+
+    .forensic-heading p {
+        font-size: 14px;
+    }
+
+}
+
+
+/* ==============================
+   WORKING LOGOUT BUTTON
+================================ */
+
+#logout-btn.logout-btn {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 10px;
+
+    color: #94a3b8;
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+}
+
+/* Logout icon */
+#logout-btn .logout-icon {
+    font-size: 27px;
+    font-weight: 700;
+    line-height: 1;
+
+    transform: rotate(180deg);
+    display: inline-block;
+}
+
+/* Hover effect */
+#logout-btn.logout-btn:hover {
+    color: #ff4d4f;
+    background: rgba(255, 77, 79, 0.12);
+    border-color: rgba(255, 77, 79, 0.35);
+
+    transform: translateX(2px);
+}
+
+/* Click effect */
+#logout-btn.logout-btn:active {
+    transform: scale(0.92);
+}
+
+/* Keyboard focus */
+#logout-btn.logout-btn:focus {
+    outline: none;
+    border-color: #ff4d4f;
+    box-shadow: 0 0 0 3px rgba(255, 77, 79, 0.15);
+}
+/* =========================================================
+   LIVE ACTIVITY FEED
+   Shows uploads arriving from any client, phone included.
+   ========================================================= */
+
+#live-feed-card {
+    margin-bottom: 20px;
+    padding: 18px;
+    background: #182334;
+    border: 1px solid #334155;
+    border-radius: 14px;
+}
+
+.live-feed-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.live-feed-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #94a3b8;
+}
+
+.live-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #2ecc71;
+    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+    animation: live-pulse 2s infinite;
+}
+
+.live-dot.stale {
+    background: #64748b;
+    animation: none;
+    box-shadow: none;
+}
+
+@keyframes live-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.6); }
+    70%  { box-shadow: 0 0 0 7px rgba(46, 204, 113, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+}
+
+.live-latest {
+    padding: 12px 14px;
+    background: #111827;
+    border: 1px solid #2d3b50;
+    border-radius: 10px;
+    color: #e2e8f0;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.live-latest .live-filename {
+    display: block;
+    color: #f1f5f9;
+    font-weight: 700;
+    margin-bottom: 6px;
+    word-break: break-all;
+}
+
+.live-latest .live-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 6px 14px;
+    color: #94a3b8;
+}
+
+.live-latest .live-grid b {
+    color: #e2e8f0;
+    font-weight: 600;
+}
+
+.live-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    vertical-align: middle;
+}
+
+.live-badge.phone   { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+.live-badge.browser { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
+
+.live-files {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    max-height: 190px;
+    overflow-y: auto;
+}
+
+.live-files li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 2px;
+    border-bottom: 1px solid #202c3d;
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.live-files li:last-child { border-bottom: none; }
+
+.live-files .lf-name {
+    color: #c8d4e3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.live-files .lf-meta {
+    flex: 0 0 auto;
+    color: #64748b;
+}
+
+.live-files li.fresh .lf-name { color: #f87171; }

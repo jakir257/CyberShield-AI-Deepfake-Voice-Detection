@@ -1,0 +1,601 @@
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // Initialize Lucide Icons
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+
+    // --- DOM Elements ---
+    const authContainer = document.getElementById('auth-container');
+    const authSignIn = document.getElementById('auth-signin');
+    const authSignUp = document.getElementById('auth-signup');
+    const dashboardApp = document.getElementById('dashboard-app');
+
+    const gotoSignUpBtn = document.getElementById('goto-signup-btn');
+    const gotoSignInBtn = document.getElementById('goto-signin-btn');
+
+    const signinForm = document.getElementById('signin-form');
+    const signupForm = document.getElementById('signup-form');
+    const signupFullname = document.getElementById('signup-fullname');
+
+    const userDisplayName = document.getElementById('user-display-name');
+    const userAvatar = document.getElementById('user-avatar');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    const selectAudioBtn = document.getElementById('select-audio-btn');
+    const audioInput = document.getElementById('audio-file-input');
+
+    // --- Authentication Navigation ---
+    gotoSignUpBtn.addEventListener('click', () => {
+        authSignIn.classList.add('hidden');
+        authSignUp.classList.remove('hidden');
+    });
+
+    gotoSignInBtn.addEventListener('click', () => {
+        authSignUp.classList.add('hidden');
+        authSignIn.classList.remove('hidden');
+    });
+
+    // --- Form Submit Handlers ---
+    function handleAuthSubmit(event) {
+        event.preventDefault();
+
+        // Dynamically update user profile if Full Name was provided during sign-up
+        const nameVal = signupFullname ? signupFullname.value.trim() : '';
+        if (nameVal) {
+            userDisplayName.innerText = nameVal;
+            
+            // Extract Initials (e.g., "John Doe" -> "JD")
+            const initials = nameVal
+                .split(' ')
+                .filter(part => part.length > 0)
+                .map(part => part[0])
+                .join('')
+                .toUpperCase()
+                .slice(0, 2);
+
+            userAvatar.innerText = initials || 'JD';
+        }
+
+        // Switch screens
+        authContainer.classList.add('hidden');
+        dashboardApp.classList.remove('hidden');
+    }
+
+    signinForm.addEventListener('submit', handleAuthSubmit);
+    signupForm.addEventListener('submit', handleAuthSubmit);
+
+    // Logout Handler
+    logoutBtn.addEventListener('click', () => {
+        dashboardApp.classList.add('hidden');
+        authContainer.classList.remove('hidden');
+        authSignUp.classList.add('hidden');
+        authSignIn.classList.remove('hidden');
+    });
+
+    // --- Tab Navigation System ---
+    function showTab(tabId) {
+        // Hide all section tabs
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.add('hidden');
+        });
+
+        // Reset styling on all sidebar links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active-tab', 'text-red-500');
+            link.classList.add('text-slate-400');
+        });
+
+        // Reveal the requested tab section
+        const targetTab = document.getElementById('tab-' + tabId);
+        if (targetTab) {
+            targetTab.classList.remove('hidden');
+        }
+
+        // Set sidebar nav link to active
+        const activeNav = document.getElementById('nav-' + tabId);
+        if (activeNav) {
+            activeNav.classList.add('active-tab');
+            activeNav.classList.remove('text-slate-400');
+        }
+    }
+
+    // Attach click events to Sidebar links
+    document.querySelectorAll('.nav-link').forEach(navItem => {
+        navItem.addEventListener('click', () => {
+            const tabTarget = navItem.getAttribute('data-tab');
+            if (tabTarget) showTab(tabTarget);
+        });
+    });
+
+    // Attach click events to Quick Nav buttons inside Dashboard Overview
+    document.querySelectorAll('.quick-nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabTarget = btn.getAttribute('data-tab');
+            if (tabTarget) showTab(tabTarget);
+        });
+    });
+
+
+    /* =========================================================
+    AUDIO UPLOAD & STANDARDIZATION
+    ========================================================= */
+
+    const uploadForm = document.getElementById("audio-upload-form");
+    const fileInput = document.getElementById("audio-file-input");
+    const uploadState = document.getElementById("voice-upload-state");
+    const resultBox = document.getElementById("audio-result");
+    const errorBox = document.getElementById("audio-error");
+    const tryAgainBtn = document.getElementById("try-again-btn");
+
+
+    /* =========================================================
+    SELECT FILE BUTTON
+    ========================================================= */
+
+    if (selectAudioBtn && fileInput) {
+
+        selectAudioBtn.addEventListener("click", function () {
+
+            fileInput.click();
+
+        });
+
+    }
+
+
+    /* =========================================================
+    FILE SELECTED
+    ========================================================= */
+
+    if (fileInput) {
+
+        fileInput.addEventListener("change", function () {
+
+            if (fileInput.files.length > 0) {
+
+                uploadAudio();
+
+            }
+
+        });
+
+    }
+
+
+    /* =========================================================
+    UPLOAD AUDIO
+    ========================================================= */
+
+    async function uploadAudio() {
+
+        const formData = new FormData(uploadForm);
+
+        /* Hide error if previous attempt failed */
+        errorBox.style.display = "none";
+
+        /* Show processing state */
+        uploadState.innerHTML = `
+            <div class="audio-loading-icon">
+                ⟳
+            </div>
+
+            <h3>Processing Audio...</h3>
+
+            <p class="voice-upload-text">
+                Converting and standardizing your audio.
+                <br>
+                Please wait...
+            </p>
+        `;
+
+        try {
+
+            const response = await fetch(
+                uploadForm.action,
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+            const data = await response.json();
+
+
+            /* =================================================
+            SUCCESS
+            ================================================= */
+
+            if (data.status === "success") {
+
+                /* Hide upload state */
+                uploadState.style.display = "none";
+
+
+                /* Show result INSIDE SAME CARD */
+                resultBox.style.display = "block";
+
+
+                /* Sample rate */
+                document.getElementById(
+                    "sample-rate"
+                ).textContent = data.sample_rate;
+
+
+                /* Channels */
+                document.getElementById(
+                    "channels"
+                ).textContent = data.channels;
+
+
+                /* Duration */
+                document.getElementById(
+                    "duration"
+                ).textContent = data.duration;
+
+
+                /* Audio player */
+                const audioPlayer =
+                    document.getElementById(
+                        "processed-audio"
+                    );
+
+                audioPlayer.src = data.processed_url;
+
+                audioPlayer.load();
+                
+                document.getElementById(
+                    "original-filename"
+                ).textContent = data.original_filename;
+
+
+                document.getElementById(
+                    "processed-filename"
+                ).textContent = data.processed_filename;
+
+                document.getElementById(
+                    "original-duration"
+                ).textContent =
+                    data.original_duration;
+
+                document.getElementById(
+                    "trimmed-duration"
+                ).textContent =
+                    data.trimmed_duration;
+
+                document.getElementById(
+                    "segment-duration"
+                ).textContent =
+                    data.segment_duration;
+
+                document.getElementById(
+                    "segment-count"
+                ).textContent =
+                    data.segment_count;
+                
+
+                // =================================================
+                // NOISE REDUCED AUDIO
+                // =================================================
+
+                const noiseReducedAudio =
+                    document.getElementById(
+                        "noise-reduced-audio"
+                    );
+
+                if (
+                    noiseReducedAudio &&
+                    data.noise_reduced_url
+                ) {
+
+                    noiseReducedAudio.src =
+                        data.noise_reduced_url;
+
+                    noiseReducedAudio.load();
+                }
+
+                // =================================================
+                // NOISE REDUCED FILENAME
+                // =================================================
+
+                const noiseReducedFilename =
+                    document.getElementById(
+                        "noise-reduced-filename"
+                    );
+
+                if (
+                    noiseReducedFilename &&
+                    data.noise_reduced_filename
+                ) {
+
+                    noiseReducedFilename.textContent =
+                        data.noise_reduced_filename;
+                }
+
+                // =================================================
+                // NOISE REDUCTION STRENGTH
+                // =================================================
+
+                const noiseStrength =
+                    document.getElementById(
+                        "noise-reduction-strength"
+                    );
+
+                if (
+                    noiseStrength &&
+                    data.noise_reduction_strength !== undefined
+                ) {
+
+                    noiseStrength.textContent =
+                        data.noise_reduction_strength;
+                }
+
+
+                /* =====================================================
+                TRIMMED AUDIO
+                ===================================================== */
+
+                const trimmedAudio =
+                    document.getElementById("trimmed-audio");
+
+                trimmedAudio.src =
+                    data.trimmed_url;
+
+                trimmedAudio.load();
+
+
+                /* =====================================================
+                SEGMENTED AUDIO
+                ===================================================== */
+
+                const segmentsContainer =
+                    document.getElementById(
+                        "audio-segments-container"
+                    );
+
+                segmentsContainer.innerHTML = "";
+
+
+                data.segment_urls.forEach(
+                    function(url, index) {
+
+                        const segmentNumber =
+                            String(index + 1).padStart(3, "0");
+
+
+                        const segmentBox =
+                            document.createElement("div");
+
+                        segmentBox.className =
+                            "audio-segment-item";
+
+
+                        segmentBox.innerHTML = `
+
+                            <div class="segment-header">
+
+                                <span>
+                                    Segment ${segmentNumber}
+                                </span>
+
+                                <strong>
+                                    ${data.segment_duration} sec
+                                </strong>
+
+                            </div>
+
+                            <audio
+                                controls
+                                preload="metadata"
+                                src="${url}"
+                            >
+                                Your browser does not support
+                                audio playback.
+                            </audio>
+
+                        `;
+
+
+                        segmentsContainer.appendChild(
+                            segmentBox
+                        );
+
+                    }
+                );
+
+            }
+
+
+            /* =================================================
+            ERROR
+            ================================================= */
+
+            else {
+
+                uploadState.style.display = "none";
+
+                errorBox.style.display = "block";
+
+                document.getElementById(
+                    "error-message"
+                ).textContent = data.message;
+
+            }
+
+        }
+
+
+        /* =====================================================
+        CONNECTION / SERVER ERROR
+        ===================================================== */
+
+        catch (error) {
+
+            uploadState.style.display = "none";
+
+            errorBox.style.display = "block";
+
+            document.getElementById(
+                "error-message"
+            ).textContent =
+                "Something went wrong while processing the audio.";
+
+            console.error(error);
+
+        }
+
+    }
+
+
+    /* =========================================================
+    TRY AGAIN
+    ========================================================= */
+
+    if (tryAgainBtn) {
+
+        tryAgainBtn.addEventListener("click", function () {
+
+            /* Hide result */
+            resultBox.style.display = "none";
+
+            /* Hide error */
+            errorBox.style.display = "none";
+
+
+            /* Restore upload state */
+
+            uploadState.innerHTML = `
+
+                <i
+                    data-lucide="upload-cloud"
+                    class="voice-upload-icon"
+                ></i>
+
+                <h3>Upload Audio File</h3>
+
+                <p class="voice-upload-text">
+                    Drag and drop WAV, MP3, M4A or FLAC files here
+                    <br>
+                    <span>(Max 10MB)</span>
+                </p>
+
+                <form
+                    id="audio-upload-form"
+                    method="POST"
+                    action="${uploadForm.action}"
+                    enctype="multipart/form-data"
+                >
+
+                    <input
+                        type="file"
+                        id="audio-file-input"
+                        name="audio"
+                        accept=".wav,.mp3,.m4a,.flac"
+                        required
+                        hidden
+                    >
+
+                    <button
+                        type="button"
+                        id="select-audio-btn"
+                    >
+                        Select File
+                    </button>
+
+                </form>
+
+            `;
+
+            uploadState.style.display = "block";
+
+
+            /* Reinitialize the file input/button references */
+
+            location.reload();
+
+        });
+
+    }
+
+
+    /* =========================================================
+    LIVE ACTIVITY FEED
+
+    The page has no push channel, so uploads made from the phone
+    were previously invisible here. Poll /recent/ instead.
+    ========================================================= */
+
+    const liveLatest = document.getElementById("live-latest");
+    const liveFiles  = document.getElementById("live-files");
+    const liveDot    = document.getElementById("live-dot");
+
+    let lastSeenAt = 0;
+
+    function humanSize(bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + " KB";
+        return (bytes / 1048576).toFixed(1) + " MB";
+    }
+
+    function ago(epochSeconds) {
+        const secs = Math.max(0, Math.floor(Date.now() / 1000 - epochSeconds));
+        if (secs < 60) return secs + "s ago";
+        if (secs < 3600) return Math.floor(secs / 60) + "m ago";
+        if (secs < 86400) return Math.floor(secs / 3600) + "h ago";
+        return Math.floor(secs / 86400) + "d ago";
+    }
+
+    async function refreshLive() {
+
+        if (!liveLatest) return;
+
+        try {
+            const res = await fetch("/recent/", { cache: "no-store" });
+            const data = await res.json();
+
+            const last = data.last;
+
+            if (last) {
+
+                const badge = last.source === "phone" ? "phone" : "browser";
+
+                liveLatest.innerHTML =
+                    '<span class="live-filename">' + last.original_filename +
+                    '<span class="live-badge ' + badge + '">' + badge.toUpperCase() +
+                    '</span></span>' +
+                    '<div class="live-grid">' +
+                    '<span>Sample rate <b>' + last.sample_rate + ' Hz</b></span>' +
+                    '<span>Duration <b>' + last.duration + ' s</b></span>' +
+                    '<span>After trim <b>' + last.trimmed_duration + ' s</b></span>' +
+                    '<span>Segments <b>' + last.segment_count + ' x ' +
+                    last.segment_duration + 's</b></span>' +
+                    '<span>Noise <b>' + last.noise_reduction_strength + '</b></span>' +
+                    '<span>Received <b>' + ago(last.received_at) + '</b></span>' +
+                    '</div>';
+
+                /* pulse green only while something arrived recently */
+                const fresh = (Date.now() / 1000 - last.received_at) < 120;
+                liveDot.classList.toggle("stale", !fresh);
+
+                if (last.received_at > lastSeenAt) {
+                    lastSeenAt = last.received_at;
+                }
+            }
+
+            liveFiles.innerHTML = (data.files || []).map(function (f) {
+                const fresh = (Date.now() / 1000 - f.modified) < 120 ? " fresh" : "";
+                return '<li class="' + fresh.trim() + '">' +
+                       '<span class="lf-name">' + f.name + '</span>' +
+                       '<span class="lf-meta">' + humanSize(f.size) + ' - ' +
+                       ago(f.modified) + '</span></li>';
+            }).join("");
+
+        } catch (err) {
+            liveDot.classList.add("stale");
+        }
+    }
+
+    refreshLive();
+    setInterval(refreshLive, 3000);
+
+});

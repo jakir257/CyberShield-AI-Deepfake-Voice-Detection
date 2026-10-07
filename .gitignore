@@ -1,0 +1,62 @@
+# virtualenvs - recreated by run.bat, never committed
+/.venv
+.venv/
+
+# python bytecode
+__pycache__/
+*.py[cod]
+
+# runtime state and user data. media/ holds real call recordings and real SMS
+# pulled off a phone - it must never leave this machine.
+Deepfake Voice Detection/detection/media/
+Deepfake Voice Detection/detection/db.sqlite3
+*.sqlite3
+
+# the postgres password run.bat remembers - a credential, never committed
+db_password.txt
+
+# console output when run.bat/setup.bat are launched with a redirect
+run_out.txt
+setup_out.txt
+
+# local machine paths
+android/local.properties
+android/.gradle/
+android/build/
+android/app/build/
+
+# Callstream.apk IS committed, deliberately - it is how the phone gets the app.
+# Build outputs under android/app/build/ stay ignored; only the copy in the
+# project root is tracked, so a rebuild adds one new blob, not several.
+android/app/build/outputs/**/*.apk
+
+# editor
+.vscode/
+.idea/
+# datasets and trained models - big binaries, never committed
+/training/raw/
+/training/corpus/
+# ASVspoof 2019 LA, ~23 GB. Re-downloadable from
+# https://datashare.ed.ac.uk/handle/10283/3336 - see training/README.md
+/LA/
+/LA.zip
+
+# ASVspoof 2021 DF, ~8.6 GB per part plus the separate keys download.
+# https://zenodo.org/records/4835108 - see training/README.md
+/raw/
+/training/corpus21/
+/ASVspoof2021_DF_eval/
+ASVspoof2021_DF_eval_part*.tar
+ASVspoof2021_DF_eval_part*.tar.gz
+ASVspoof2021_DF_eval_part*.tar/
+DF-keys-full.tar.gz
+
+# Fake-or-Real, ~10 GB. https://bil.eecs.yorku.ca/datasets/
+/for-original/
+/training/corpus_for/
+
+# Forensics 0.3B weights, 1.2 GB, CC-BY-NC-4.0. Re-downloadable from
+# https://huggingface.co/eliya/forensics_0.3B_base_deepfake_classifier
+*.safetensors
+
+*.pkl
