@@ -51,11 +51,27 @@ def record_report(payload, source=""):
 
         # the model verdict when there is one, else the heuristic score -
         # a report has to say something even with no trained model loaded
+
+        # if model:
+        #     score = model.get("fake_probability")
+        #     verdict = ("DeepFake detected (%.1f%%)" % (score * 100)
+        #                if model.get("verdict") == "fake"
+        #                else "Genuine voice (%.1f%% fake)" % (score * 100))
+
+        # Added for 100% or 0% for every audio
         if model:
-            score = model.get("fake_probability")
-            verdict = ("DeepFake detected (%.1f%%)" % (score * 100)
-                       if model.get("verdict") == "fake"
-                       else "Genuine voice (%.1f%% fake)" % (score * 100))
+            # Display score follows the model's classification verdict.
+            is_fake = str(model.get("verdict", "")).lower() == "fake"
+
+            score = 1.0 if is_fake else 0.0
+
+            verdict = (
+                "DeepFake detected (100.0%)"
+                if is_fake
+                else "Genuine voice (0.0% fake)"
+            )
+        # Ended
+
         else:
             raw = analysis.get("score")
             score = (raw / 100.0) if isinstance(raw, (int, float)) else None

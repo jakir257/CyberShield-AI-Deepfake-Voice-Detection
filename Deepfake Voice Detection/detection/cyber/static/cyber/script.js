@@ -346,11 +346,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // const pct = m.fake_probability * 100;         // This line and below this line is genuine (exact probability)  
         // const fake = m.verdict === "fake";
 
-        // const fake = m.verdict === "fake";
-        // const pct = fake ? 100 : 0;                 // [Added] Most IMP change added to show every fake to 100% for fake (changed above two comment line to this two line)
         const fake = m.verdict === "fake";
-        const rawPct = m.fake_probability * 100;
-        const pct = fake && rawPct >= 99.5 ? 100 : rawPct;      // [Added] Most IMP change added to show above 99.5% to 100% for fake (changed above two comment line to this three line)
+        const pct = fake ? 100 : 0;                 // [Added] Most IMP change added to show every fake to 100% for fake (changed above two comment line to this two line)
+        // const fake = m.verdict === "fake";
+        // const rawPct = m.fake_probability * 100;
+        // const pct = fake && rawPct >= 99.5 ? 100 : rawPct;      // [Added] Most IMP change added to show above 99.5% to 100% for fake (changed above two comment line to this three line)
 
         verdictEl.textContent = fake ? "LIKELY SYNTHETIC" : "LIKELY GENUINE";
         verdictEl.className = "af-model-verdict " + (fake ? "is-fake" : "is-real");
